@@ -1,0 +1,353 @@
+"use client";
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { ExternalLink, Loader2, LogOut, Plus, Save, UserRound } from "lucide-react";
+import AvatarUploader from "@/components/AvatarUploader";
+import LinkCardEditor from "@/components/LinkCardEditor";
+import PhonePreview from "@/components/PhonePreview";
+import RealtimeBadge from "@/components/RealtimeBadge";
+import { supabase } from "@/lib/supabase/client";
+import type { KograflyLink, Profile } from "@/lib/types";
+import { ensureUrl, getSiteUrl, isValidUsername, normalizeUsername } from "@/lib/utils";
+
+type UserState = { id: string; email?: string };
+
+export default function BuilderClient() {
+  const router = useRouter();
+  const [user, setUser] = useState<UserState | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [links, setLinks] = useState<KograflyLink[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [connected, setConnected] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+
+  const publicUrl = useMemo(() => profile ? `${getSiteUrl()}/${profile.username}` : "", [profile]);
+
+  useEffect(() => {
+    let profileChannel: ReturnType<typeof supabase.channel> | null = null;
+    let mounted = true;
+
+    async function boot() {
+      const { data } = await supabase.auth.getSession();
+      if (!data.session?.user) {
+        router.push("/login");
+        return;
+      }
+      const sessionUser = { id: data.session.user.id, email: data.session.user.email || undefined };
+      if (!mounted) return;
+      setUser(sessionUser);
+      await loadProfile(sessionUser.id);
+    }
+
+    void boot();
+
+    return () => {
+      mounted = false;
+      if (profileChannel) void supabase.removeChannel(profileChannel);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router]);
+
+  useEffect(() => {
+    if (!profile?.id) return;
+    const channel = supabase
+      .channel(`builder:${profile.id}`)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles", filter: `id=eq.${profile.id}` }, (payload) => {
+        setProfile(payload.new as Profile);
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "links", filter: `profile_id=eq.${profile.id}` }, () => {
+        void loadLinks(profile.id);
+      })
+      .subscribe((status) => setConnected(status === "SUBSCRIBED"));
+
+    return () => {
+      setConnected(false);
+      void supabase.removeChannel(channel);
+    };
+  }, [profile?.id]);
+
+  async function loadProfile(userId: string) {
+    setLoading(true);
+    const { data: profileData, error } = await supabase.from("profiles").select("*").eq("owner_id", userId).maybeSingle();
+    if (error) setMessage(error.message);
+    if (profileData) {
+      setProfile(profileData);
+      await loadLinks(profileData.id);
+    }
+    setLoading(false);
+  }
+
+  async function loadLinks(profileId: string) {
+    const { data, error } = await supabase.from("links").select("*").eq("profile_id", profileId).order("sort_order", { ascending: true });
+    if (error) {
+      setMessage(error.message);
+      return;
+    }
+    setLinks(data || []);
+  }
+
+  async function createProfile(usernameInput: string) {
+    if (!user) return;
+    const username = normalizeUsername(usernameInput);
+    if (!isValidUsername(username)) {
+      setMessage("Username minimal 3 karakter dan hanya boleh huruf kecil, angka, titik, strip, atau underscore.");
+      return;
+    }
+    setSaving(true);
+    const { data, error } = await supabase
+      .from("profiles")
+      .insert({
+        owner_id: user.id,
+        username,
+        display_name: username.replace(/[._-]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+        bio: "Halo! Ini semua link penting saya di Kografly.",
+        is_published: true,
+        theme: { accent: "indigo", buttonStyle: "thread", background: "stone" }
+      })
+      .select("*")
+      .single();
+    setSaving(false);
+    if (error) {
+      setMessage(error.message.includes("duplicate") ? "Username sudah dipakai." : error.message);
+      return;
+    }
+    setProfile(data);
+    setLinks([]);
+  }
+
+  async function saveProfile() {
+    if (!profile) return;
+    const username = normalizeUsername(profile.username);
+    if (!isValidUsername(username)) {
+      setMessage("Username tidak valid. Gunakan 3-30 karakter: huruf kecil, angka, titik, strip, atau underscore.");
+      return;
+    }
+    setSaving(true);
+    const { data, error } = await supabase
+      .from("profiles")
+      .update({
+        username,
+        display_name: profile.display_name,
+        bio: profile.bio,
+        avatar_url: profile.avatar_url,
+        is_published: profile.is_published,
+        theme: profile.theme || { accent: "indigo", buttonStyle: "thread", background: "stone" }
+      })
+      .eq("id", profile.id)
+      .select("*")
+      .single();
+    setSaving(false);
+    if (error) {
+      setMessage(error.message.includes("duplicate") ? "Username sudah dipakai." : error.message);
+      return;
+    }
+    setMessage("Profile tersimpan dan public page akan update realtime.");
+    setProfile(data);
+  }
+
+  async function addLink() {
+    if (!profile || !user) return;
+    const nextOrder = links.length;
+    const { data, error } = await supabase
+      .from("links")
+      .insert({
+        profile_id: profile.id,
+        owner_id: user.id,
+        title: `Link baru ${links.length + 1}`,
+        url: "https://example.com",
+        icon_name: "Globe2",
+        animation: "rise",
+        style_variant: links.length % 2 === 0 ? "solid" : "soft",
+        sort_order: nextOrder,
+        is_active: true
+      })
+      .select("*")
+      .single();
+    if (error) {
+      setMessage(error.message);
+      return;
+    }
+    setLinks((current) => [...current, data].sort((a, b) => a.sort_order - b.sort_order));
+  }
+
+  function updateLocalLink(next: KograflyLink) {
+    setLinks((current) => current.map((item) => (item.id === next.id ? next : item)).sort((a, b) => a.sort_order - b.sort_order));
+  }
+
+  async function saveLink(link: KograflyLink) {
+    const { error } = await supabase
+      .from("links")
+      .update({
+        title: link.title,
+        url: ensureUrl(link.url),
+        icon_name: link.icon_name,
+        animation: link.animation,
+        style_variant: link.style_variant,
+        is_active: link.is_active,
+        sort_order: link.sort_order
+      })
+      .eq("id", link.id);
+    if (error) setMessage(error.message);
+    else setMessage(`Link “${link.title}” tersimpan.`);
+  }
+
+  async function deleteLink(link: KograflyLink) {
+    const { error } = await supabase.from("links").delete().eq("id", link.id);
+    if (error) setMessage(error.message);
+    else setLinks((current) => current.filter((item) => item.id !== link.id));
+  }
+
+  async function reorder(link: KograflyLink, direction: -1 | 1) {
+    const sorted = [...links].sort((a, b) => a.sort_order - b.sort_order);
+    const index = sorted.findIndex((item) => item.id === link.id);
+    const targetIndex = index + direction;
+    if (index < 0 || targetIndex < 0 || targetIndex >= sorted.length) return;
+    const target = sorted[targetIndex];
+    const linkOrder = link.sort_order;
+    const targetOrder = target.sort_order;
+    updateLocalLink({ ...link, sort_order: targetOrder });
+    updateLocalLink({ ...target, sort_order: linkOrder });
+    await Promise.all([
+      supabase.from("links").update({ sort_order: targetOrder }).eq("id", link.id),
+      supabase.from("links").update({ sort_order: linkOrder }).eq("id", target.id)
+    ]);
+  }
+
+  async function logout() {
+    await supabase.auth.signOut();
+    router.push("/");
+  }
+
+  if (loading) {
+    return (
+      <main className="grid min-h-screen place-items-center bg-kografly-stone thread-grid">
+        <Loader2 className="h-8 w-8 animate-spin text-kografly-indigo" />
+      </main>
+    );
+  }
+
+  if (!profile) {
+    return <CreateProfile saving={saving} onCreate={createProfile} message={message} />;
+  }
+
+  return (
+    <main className="min-h-screen bg-kografly-stone px-4 py-6 thread-grid lg:px-8">
+      <div className="mx-auto max-w-7xl">
+        <header className="mb-6 flex flex-col justify-between gap-4 rounded-[2rem] border border-stone-200 bg-white/95 p-5 shadow-soft backdrop-blur md:flex-row md:items-center">
+          <div>
+            <p className="text-sm font-bold uppercase tracking-[.25em] text-kografly-amber">Kografly Builder</p>
+            <h1 className="font-serif text-4xl font-bold text-stone-950">Editor bio-link</h1>
+            <p className="mt-1 text-sm text-stone-500">Public URL: <a className="font-bold text-kografly-indigo" href={publicUrl} target="_blank" rel="noreferrer">{publicUrl}</a></p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <RealtimeBadge connected={connected} />
+            <Link href="/dashboard" className="rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-bold text-stone-700 hover:text-kografly-indigo">Dashboard</Link>
+            <a href={publicUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full bg-stone-950 px-4 py-2 text-sm font-bold text-white"><ExternalLink className="h-4 w-4" /> Public</a>
+            <button onClick={logout} className="rounded-full border border-stone-200 bg-white p-2 text-stone-500 hover:text-kografly-error"><LogOut className="h-4 w-4" /></button>
+          </div>
+        </header>
+
+        {message && <p className="mb-5 rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-sm font-semibold text-kografly-amber">{message}</p>}
+
+        <div className="grid gap-8 lg:grid-cols-[1fr_410px]">
+          <section className="space-y-6">
+            <article className="rounded-[2rem] border border-stone-200 bg-white p-6 shadow-soft">
+              <div className="mb-5 flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-sm font-bold uppercase tracking-[.2em] text-kografly-teal">Profile</p>
+                  <h2 className="font-serif text-3xl font-bold text-stone-950">Identitas public</h2>
+                </div>
+                <label className="flex items-center gap-2 rounded-full border border-stone-200 px-3 py-2 text-sm font-bold text-stone-600">
+                  <input type="checkbox" checked={profile.is_published} onChange={(e) => setProfile({ ...profile, is_published: e.target.checked })} className="accent-kografly-indigo" /> Published
+                </label>
+              </div>
+
+              <AvatarUploader
+                userId={user?.id || profile.owner_id}
+                avatarUrl={profile.avatar_url}
+                displayName={profile.display_name}
+                onUploaded={(url) => setProfile({ ...profile, avatar_url: url })}
+              />
+
+              <div className="mt-6 grid gap-4 md:grid-cols-2">
+                <label className="block">
+                  <span className="mb-2 block text-sm font-bold text-stone-700">Display name</span>
+                  <input value={profile.display_name} onChange={(e) => setProfile({ ...profile, display_name: e.target.value })} className="w-full rounded-2xl border border-stone-200 px-4 py-3 outline-none focus:border-kografly-indigo" />
+                </label>
+                <label className="block">
+                  <span className="mb-2 block text-sm font-bold text-stone-700">Username</span>
+                  <div className="flex rounded-2xl border border-stone-200 px-4 py-3 font-bold focus-within:border-kografly-indigo">
+                    <span className="text-kografly-amber">/</span>
+                    <input value={profile.username} onChange={(e) => setProfile({ ...profile, username: normalizeUsername(e.target.value) })} className="w-full bg-transparent px-1 outline-none" />
+                  </div>
+                </label>
+              </div>
+              <label className="mt-4 block">
+                <span className="mb-2 block text-sm font-bold text-stone-700">Bio</span>
+                <textarea value={profile.bio || ""} onChange={(e) => setProfile({ ...profile, bio: e.target.value })} rows={4} className="w-full rounded-2xl border border-stone-200 px-4 py-3 outline-none focus:border-kografly-indigo" />
+              </label>
+              <button onClick={saveProfile} disabled={saving} className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-kografly-indigo px-5 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5 disabled:opacity-70">
+                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                Simpan profile
+              </button>
+            </article>
+
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-bold uppercase tracking-[.2em] text-kografly-amber">Bio links</p>
+                <h2 className="font-serif text-3xl font-bold text-stone-950">Link tanpa batas</h2>
+              </div>
+              <button onClick={addLink} className="inline-flex items-center gap-2 rounded-full bg-stone-950 px-5 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5">
+                <Plus className="h-4 w-4" /> Tambah link
+              </button>
+            </div>
+
+            {links.length ? (
+              links.sort((a, b) => a.sort_order - b.sort_order).map((link) => (
+                <LinkCardEditor
+                  key={link.id}
+                  link={link}
+                  onChange={updateLocalLink}
+                  onSave={saveLink}
+                  onDelete={deleteLink}
+                  onMoveUp={(item) => reorder(item, -1)}
+                  onMoveDown={(item) => reorder(item, 1)}
+                />
+              ))
+            ) : (
+              <button onClick={addLink} className="grid w-full place-items-center rounded-[2rem] border border-dashed border-stone-300 bg-white/80 p-10 text-center text-stone-500 hover:border-kografly-indigo hover:text-kografly-indigo">
+                <Plus className="mb-2 h-6 w-6" /> Tambahkan link pertama kamu.
+              </button>
+            )}
+          </section>
+
+          <PhonePreview profile={profile} links={links} />
+        </div>
+      </div>
+    </main>
+  );
+}
+
+function CreateProfile({ saving, message, onCreate }: { saving: boolean; message: string | null; onCreate: (username: string) => void }) {
+  const [username, setUsername] = useState("");
+  return (
+    <main className="grid min-h-screen place-items-center bg-kografly-stone px-6 thread-grid">
+      <section className="w-full max-w-lg rounded-[2rem] border border-stone-200 bg-white p-6 shadow-thread">
+        <div className="grid h-14 w-14 place-items-center rounded-2xl bg-indigo-50 text-kografly-indigo"><UserRound className="h-6 w-6" /></div>
+        <h1 className="mt-5 font-serif text-4xl font-bold text-stone-950">Buat profile Kografly</h1>
+        <p className="mt-2 text-stone-600">Akunmu belum punya username public. Pilih satu untuk mulai.</p>
+        <div className="mt-5 flex rounded-2xl border border-stone-200 px-4 py-3 text-lg font-bold focus-within:border-kografly-indigo">
+          <span className="text-kografly-amber">/</span>
+          <input value={username} onChange={(e) => setUsername(normalizeUsername(e.target.value))} className="w-full bg-transparent px-1 outline-none" placeholder="username" />
+        </div>
+        {message && <p className="mt-3 rounded-2xl bg-amber-50 px-4 py-3 text-sm font-semibold text-kografly-amber">{message}</p>}
+        <button onClick={() => onCreate(username)} disabled={saving} className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-kografly-indigo px-5 py-4 font-bold text-white disabled:opacity-70">
+          {saving && <Loader2 className="h-4 w-4 animate-spin" />} Buat profile
+        </button>
+      </section>
+    </main>
+  );
+}
