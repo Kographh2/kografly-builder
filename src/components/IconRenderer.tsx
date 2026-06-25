@@ -33,7 +33,11 @@ const ICON_ALIASES: Record<string, string> = {
   Social: "AtSign",
   Gaming: "Gamepad2",
   Code: "Code2",
-  Community: "MessageCircle"
+  Community: "MessageCircle",
+  Customer: "Headphones",
+  FAQ: "CircleHelp",
+  Privacy: "LockKeyhole",
+  Service: "ShieldCheck"
 };
 
 export default function IconRenderer({ name = "Globe2", className = "h-5 w-5", strokeWidth = 2 }: Props) {
@@ -43,4 +47,3 @@ export default function IconRenderer({ name = "Globe2", className = "h-5 w-5", s
 
   return <Icon className={className} strokeWidth={strokeWidth} />;
 }
-

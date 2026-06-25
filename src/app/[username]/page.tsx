@@ -69,4 +69,3 @@ export default async function UsernamePage({ params }: Props) {
 
   return <PublicProfile initialProfile={profile} initialLinks={links} />;
 }
-

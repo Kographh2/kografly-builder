@@ -1,8 +1,9 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, LockKeyhole, Mail } from "lucide-react";
+import { defaultTheme } from "@/constants/templates";
 import { supabase } from "@/lib/supabase/client";
 import { isValidUsername, normalizeUsername } from "@/lib/utils";
 
@@ -47,7 +48,7 @@ export default function AuthPanel({ initialUsername }: Props) {
       display_name: finalUsername.replace(/[._-]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
       bio: "Halo! Ini semua link penting saya di Kografly.",
       is_published: true,
-      theme: { accent: "indigo", buttonStyle: "soft", background: "stone" }
+      theme: defaultTheme
     });
 
     if (error) {

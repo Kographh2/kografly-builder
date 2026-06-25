@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { ExternalLink, Loader2, LogOut, Plus, RotateCcw, Save, UserRound } from "lucide-react";
+import { Check, ExternalLink, Loader2, LogOut, Plus, RotateCcw, Save, UserRound } from "lucide-react";
 import AvatarUploader from "@/components/AvatarUploader";
+import KograflyMascot from "@/components/KograflyMascot";
 import LinkCardEditor from "@/components/LinkCardEditor";
 import PhonePreview from "@/components/PhonePreview";
 import RealtimeBadge from "@/components/RealtimeBadge";
-import { defaultTheme, normalizeTheme, themeColorFields } from "@/constants/templates";
+import { applyTemplate, defaultTheme, normalizeTheme, templatePresets, themeColorFields } from "@/constants/templates";
 import { supabase } from "@/lib/supabase/client";
 import type { KograflyLink, Profile, ProfileTheme } from "@/lib/types";
 import { ensureUrl, getSiteUrl, isValidUsername, normalizeUsername } from "@/lib/utils";
@@ -159,7 +160,7 @@ export default function BuilderClient() {
       return;
     }
 
-    setMessage("Profile dan tampilan Kografly Standard tersimpan.");
+    setMessage("Template, warna, dan profile sudah tersimpan.");
     setProfile(data as Profile);
   }
 
@@ -176,7 +177,7 @@ export default function BuilderClient() {
         url: "https://example.com",
         icon_name: "Globe2",
         animation: "rise",
-        style_variant: links.length % 2 === 0 ? "solid" : "soft",
+        style_variant: currentTheme.buttonStyle,
         sort_order: nextOrder,
         is_active: true
       })
@@ -266,8 +267,8 @@ export default function BuilderClient() {
       <div className="mx-auto max-w-7xl">
         <header className="mb-6 flex flex-col justify-between gap-4 rounded-[2rem] border border-stone-200 bg-white/95 p-5 shadow-soft backdrop-blur md:flex-row md:items-center">
           <div>
-            <p className="text-sm font-bold uppercase tracking-[.25em] text-kografly-teal">Kografly Builder</p>
-            <h1 className="text-4xl font-bold tracking-[-0.04em] text-stone-950">Editor bio-link</h1>
+            <p className="text-sm font-extrabold uppercase tracking-[.25em] text-kografly-teal">Kografly Builder</p>
+            <h1 className="text-4xl font-extrabold tracking-[-0.055em] text-stone-950">Editor bio-link</h1>
             <p className="mt-1 text-sm text-stone-500">
               Public URL: <a className="font-bold text-kografly-indigo" href={publicUrl} target="_blank" rel="noreferrer">{publicUrl}</a>
             </p>
@@ -287,8 +288,8 @@ export default function BuilderClient() {
             <article className="rounded-[2rem] border border-stone-200 bg-white p-6 shadow-soft">
               <div className="mb-5 flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-sm font-bold uppercase tracking-[.2em] text-kografly-teal">Profile</p>
-                  <h2 className="text-3xl font-bold tracking-[-0.04em] text-stone-950">Identitas public</h2>
+                  <p className="text-sm font-extrabold uppercase tracking-[.2em] text-kografly-teal">Profile</p>
+                  <h2 className="text-3xl font-extrabold tracking-[-0.055em] text-stone-950">Identitas public</h2>
                 </div>
                 <label className="flex items-center gap-2 rounded-full border border-stone-200 px-3 py-2 text-sm font-bold text-stone-600">
                   <input type="checkbox" checked={profile.is_published} onChange={(e) => setProfile({ ...profile, is_published: e.target.checked })} className="accent-kografly-indigo" /> Published
@@ -324,10 +325,10 @@ export default function BuilderClient() {
             <article className="rounded-[2rem] border border-stone-200 bg-white p-6 shadow-soft">
               <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
                 <div>
-                  <p className="text-sm font-bold uppercase tracking-[.2em] text-kografly-amber">Tampilan</p>
-                  <h2 className="text-3xl font-bold tracking-[-0.04em] text-stone-950">Kografly Standard</h2>
+                  <p className="text-sm font-extrabold uppercase tracking-[.2em] text-kografly-amber">Template</p>
+                  <h2 className="text-3xl font-extrabold tracking-[-0.055em] text-stone-950">Kografly Standard UI</h2>
                   <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-500">
-                    Satu template minimalis dan elegan. Warnanya bisa kamu atur, lalu cek dulu di preview HP sebelum disimpan.
+                    Pilih salah satu dari 3 layout biru atau 3 layout hijau. Klik template untuk preview di HP, lalu simpan kalau sudah cocok.
                   </p>
                 </div>
                 <button
@@ -335,33 +336,73 @@ export default function BuilderClient() {
                   onClick={() => updateTheme(defaultTheme)}
                   className="inline-flex items-center gap-2 rounded-full border border-stone-200 px-4 py-2 text-sm font-bold text-stone-600 hover:text-kografly-indigo"
                 >
-                  <RotateCcw className="h-4 w-4" /> Reset warna
+                  <RotateCcw className="h-4 w-4" /> Reset
                 </button>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {themeColorFields.map((field) => (
-                  <label key={field.key} className="rounded-[1.3rem] border border-stone-200 p-3">
-                    <span className="flex items-center justify-between gap-3">
-                      <span>
-                        <span className="block text-sm font-bold text-stone-800">{field.label}</span>
-                        <span className="text-xs text-stone-500">{field.helper}</span>
+              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                {templatePresets.map((preset) => {
+                  const active = currentTheme.template === preset.id;
+                  return (
+                    <button
+                      type="button"
+                      key={preset.id}
+                      onClick={() => updateTheme(applyTemplate(preset.id))}
+                      className={`group overflow-hidden rounded-[1.55rem] border p-0 text-left transition hover:-translate-y-0.5 ${active ? "border-kografly-indigo shadow-thread" : "border-stone-200 shadow-soft"}`}
+                    >
+                      <div className="relative h-28 overflow-hidden" style={{ background: `linear-gradient(135deg, ${preset.theme.accent}, ${preset.theme.secondary})` }}>
+                        <div className="absolute -left-8 -top-10 h-24 w-24 rounded-full bg-white/15" />
+                        <KograflyMascot mascot={preset.mascot} primary={preset.theme.accent} secondary={preset.theme.secondary} soft={preset.theme.soft} compact className="absolute -bottom-7 right-2" />
+                        <span className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.16em]" style={{ color: preset.theme.text }}>
+                          {preset.colorMode === "blue" ? "Biru" : "Hijau"}
+                        </span>
+                        {active ? <span className="absolute right-4 top-4 grid h-8 w-8 place-items-center rounded-full bg-white text-kografly-indigo"><Check className="h-4 w-4" /></span> : null}
+                      </div>
+                      <div className="p-4">
+                        <h3 className="font-extrabold tracking-[-0.03em] text-stone-950">{preset.name}</h3>
+                        <p className="mt-1 text-xs font-bold uppercase tracking-[0.14em] text-stone-400">{preset.headline}</p>
+                        <p className="mt-2 text-sm leading-6 text-stone-500">{preset.description}</p>
+                        <div className="mt-3 flex flex-wrap gap-1.5">
+                          {preset.tags.map((tag) => <span key={tag} className="rounded-full px-2.5 py-1 text-xs font-bold" style={{ background: preset.theme.soft, color: preset.theme.accent }}>{tag}</span>)}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="mt-6 rounded-[1.55rem] border border-stone-200 bg-stone-50/70 p-4">
+                <div className="mb-4 flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
+                  <div>
+                    <h3 className="text-xl font-extrabold tracking-[-0.04em] text-stone-950">Warna custom</h3>
+                    <p className="text-sm text-stone-500">Warna template bisa diubah lagi tanpa menghilangkan layout dan mascot.</p>
+                  </div>
+                  <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-stone-500 shadow-soft">Preview dulu, baru simpan</span>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {themeColorFields.map((field) => (
+                    <label key={field.key} className="rounded-[1.3rem] border border-stone-200 bg-white p-3">
+                      <span className="flex items-center justify-between gap-3">
+                        <span>
+                          <span className="block text-sm font-bold text-stone-800">{field.label}</span>
+                          <span className="text-xs text-stone-500">{field.helper}</span>
+                        </span>
+                        <input
+                          type="color"
+                          value={currentTheme[field.key]}
+                          onChange={(e) => updateTheme({ ...currentTheme, [field.key]: e.target.value })}
+                          className="h-10 w-12 cursor-pointer rounded-xl border border-stone-200 bg-transparent p-1"
+                          aria-label={field.label}
+                        />
                       </span>
                       <input
-                        type="color"
                         value={currentTheme[field.key]}
                         onChange={(e) => updateTheme({ ...currentTheme, [field.key]: e.target.value })}
-                        className="h-10 w-12 cursor-pointer rounded-xl border border-stone-200 bg-transparent p-1"
-                        aria-label={field.label}
+                        className="mt-3 w-full rounded-xl border border-stone-200 px-3 py-2 text-sm font-semibold uppercase outline-none focus:border-kografly-indigo"
                       />
-                    </span>
-                    <input
-                      value={currentTheme[field.key]}
-                      onChange={(e) => updateTheme({ ...currentTheme, [field.key]: e.target.value })}
-                      className="mt-3 w-full rounded-xl border border-stone-200 px-3 py-2 text-sm font-semibold uppercase outline-none focus:border-kografly-indigo"
-                    />
-                  </label>
-                ))}
+                    </label>
+                  ))}
+                </div>
               </div>
 
               <label className="mt-4 block max-w-sm">
@@ -371,23 +412,23 @@ export default function BuilderClient() {
                   onChange={(e) => updateTheme({ ...currentTheme, buttonStyle: e.target.value as ProfileTheme["buttonStyle"] })}
                   className="w-full rounded-2xl border border-stone-200 bg-white px-4 py-3 outline-none focus:border-kografly-indigo"
                 >
-                  <option value="solid">Solid elegant</option>
+                  <option value="solid">Solid brand</option>
                   <option value="outline">Outline</option>
-                  <option value="soft">Soft accent</option>
+                  <option value="soft">Soft card</option>
                   <option value="glass">Glass</option>
                 </select>
               </label>
 
               <button onClick={saveProfile} disabled={saving} className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-kografly-indigo px-5 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5 disabled:opacity-70">
                 {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                Simpan profile & tampilan
+                Simpan profile & template
               </button>
             </article>
 
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-sm font-bold uppercase tracking-[.2em] text-kografly-amber">Bio links</p>
-                <h2 className="text-3xl font-bold tracking-[-0.04em] text-stone-950">Link tanpa batas</h2>
+                <p className="text-sm font-extrabold uppercase tracking-[.2em] text-kografly-amber">Bio links</p>
+                <h2 className="text-3xl font-extrabold tracking-[-0.055em] text-stone-950">Link tanpa batas</h2>
               </div>
               <button onClick={addLink} className="inline-flex items-center gap-2 rounded-full bg-stone-950 px-5 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5">
                 <Plus className="h-4 w-4" /> Tambah link
@@ -427,7 +468,7 @@ function CreateProfile({ saving, message, onCreate }: { saving: boolean; message
     <main className="grid min-h-screen place-items-center bg-kografly-stone px-6 thread-grid">
       <section className="w-full max-w-lg rounded-[2rem] border border-stone-200 bg-white p-6 shadow-thread">
         <div className="grid h-14 w-14 place-items-center rounded-2xl bg-indigo-50 text-kografly-indigo"><UserRound className="h-6 w-6" /></div>
-        <h1 className="mt-5 text-4xl font-bold tracking-[-0.04em] text-stone-950">Buat profile Kografly</h1>
+        <h1 className="mt-5 text-4xl font-extrabold tracking-[-0.055em] text-stone-950">Buat profile Kografly</h1>
         <p className="mt-2 text-stone-600">Akunmu belum punya username public. Pilih satu untuk mulai.</p>
         <div className="mt-5 flex rounded-2xl border border-stone-200 px-4 py-3 text-lg font-bold focus-within:border-kografly-indigo">
           <span className="text-kografly-amber">/</span>
@@ -441,4 +482,3 @@ function CreateProfile({ saving, message, onCreate }: { saving: boolean; message
     </main>
   );
 }
-

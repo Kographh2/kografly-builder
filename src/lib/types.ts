@@ -6,8 +6,20 @@
   | { [key: string]: Json | undefined }
   | Json[];
 
+export type KograflyTemplateId =
+  | "blue-guide"
+  | "blue-connector"
+  | "blue-supporter"
+  | "green-guide"
+  | "green-connector"
+  | "green-supporter"
+  | "standard";
+
+export type KograflyMascotId = "owl" | "fox" | "turtle";
+
 export type ProfileTheme = {
-  template?: "standard";
+  template?: KograflyTemplateId;
+  mascot?: KograflyMascotId;
   background?: string;
   surface?: string;
   text?: string;
@@ -17,6 +29,7 @@ export type ProfileTheme = {
   button?: string;
   buttonText?: string;
   decorative?: string;
+  soft?: string;
   buttonStyle?: "solid" | "outline" | "soft" | "glass";
 };
 
@@ -162,4 +175,3 @@ export type Database = {
     CompositeTypes: Record<string, never>;
   };
 };
-

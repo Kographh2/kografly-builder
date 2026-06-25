@@ -70,4 +70,3 @@ export default function PublicProfile({ initialProfile, initialLinks }: Props) {
 
   return <ProfileCanvas profile={profile} links={sortedLinks} onTrackClick={trackClick} />;
 }
-

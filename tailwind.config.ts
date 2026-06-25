@@ -10,12 +10,12 @@ const config: Config = {
       },
       colors: {
         kografly: {
-          indigo: "#4338CA",
+          indigo: "#1E5CC8",
           amber: "#D97706",
           teal: "#0F766E",
-          stone: "#F7F3EC",
-          ink: "#18181B",
-          muted: "#6B7280",
+          stone: "#F6FAFF",
+          ink: "#0B1D3A",
+          muted: "#64748B",
           surface: "#FFFFFF",
           success: "#16A34A",
           error: "#DC2626",
@@ -48,8 +48,8 @@ const config: Config = {
           "50%": { transform: "translateY(-5px)" }
         },
         "k-glow": {
-          "0%, 100%": { boxShadow: "0 0 0 rgba(79, 70, 229, 0)" },
-          "50%": { boxShadow: "0 0 28px rgba(79, 70, 229, .28)" }
+          "0%, 100%": { boxShadow: "0 0 0 rgba(30, 92, 200, 0)" },
+          "50%": { boxShadow: "0 0 28px rgba(30, 92, 200, .28)" }
         }
       },
       animation: {
@@ -65,4 +65,3 @@ const config: Config = {
 };
 
 export default config;
-

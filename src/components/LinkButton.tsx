@@ -18,23 +18,24 @@ function getButtonStyle(link: KograflyLink, theme: ResolvedProfileTheme): CSSPro
 
   if (variant === "outline") {
     return {
-      background: hexToRgba(theme.surface, 0.55),
-      borderColor: hexToRgba(theme.button, 0.35),
+      background: hexToRgba(theme.surface, 0.62),
+      borderColor: hexToRgba(theme.button, 0.36),
       color: theme.button
     };
   }
 
   if (variant === "soft") {
     return {
-      background: hexToRgba(theme.accent, 0.1),
-      borderColor: hexToRgba(theme.accent, 0.16),
-      color: theme.accent
+      background: theme.button,
+      borderColor: hexToRgba(theme.accent, 0.08),
+      color: theme.buttonText,
+      boxShadow: `0 12px 28px ${hexToRgba(theme.accent, 0.08)}`
     };
   }
 
   if (variant === "glass") {
     return {
-      background: hexToRgba(theme.surface, 0.72),
+      background: hexToRgba(theme.surface, 0.74),
       borderColor: hexToRgba(theme.text, 0.1),
       color: theme.text,
       backdropFilter: "blur(18px)"
@@ -44,7 +45,8 @@ function getButtonStyle(link: KograflyLink, theme: ResolvedProfileTheme): CSSPro
   return {
     background: theme.button,
     borderColor: hexToRgba(theme.button, 0.95),
-    color: theme.buttonText
+    color: theme.buttonText,
+    boxShadow: `0 16px 34px ${hexToRgba(theme.accent, 0.18)}`
   };
 }
 
@@ -56,17 +58,19 @@ export default function LinkButton({ link, preview = false, theme: themeInput, o
     <>
       <span
         className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl"
-        style={{ background: hexToRgba(theme.surface, 0.18), boxShadow: `inset 0 0 0 1px ${hexToRgba(theme.buttonText, 0.12)}` }}
+        style={{ background: hexToRgba(theme.surface, 0.23), boxShadow: `inset 0 0 0 1px ${hexToRgba(theme.buttonText, 0.14)}` }}
       >
         <IconRenderer name={link.icon_name} className="h-5 w-5" />
       </span>
-      <span className="min-w-0 flex-1 truncate text-left text-[15px] font-semibold tracking-[-0.01em]">{link.title}</span>
+      <span className="min-w-0 flex-1 truncate text-left text-[15px] font-bold tracking-[-0.01em]">{link.title}</span>
       <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-xs opacity-70 transition group-hover:opacity-100">â†—</span>
     </>
   );
 
   const classes = cn(
-    "group flex w-full items-center gap-3 rounded-[1.45rem] border px-4 py-3.5 shadow-[0_14px_34px_rgba(15,23,42,0.08)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(15,23,42,0.13)]",
+    "group flex w-full items-center gap-3 rounded-[1.35rem] border px-4 py-3.5 transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(15,23,42,0.13)]",
+    theme.layout === "connector" && "rounded-[1.2rem]",
+    theme.layout === "supporter" && "rounded-[1.6rem]",
     `link-animation-${link.animation}`
   );
 
@@ -87,4 +91,3 @@ export default function LinkButton({ link, preview = false, theme: themeInput, o
     </a>
   );
 }
-

@@ -3,10 +3,10 @@
 @tailwind utilities;
 
 :root {
-  --kografly-indigo: #4338ca;
+  --kografly-indigo: #1e5cc8;
   --kografly-teal: #0f766e;
-  --kografly-bg: #f7f3ec;
-  --kografly-ink: #18181b;
+  --kografly-bg: #f6faff;
+  --kografly-ink: #0b1d3a;
 }
 
 * { box-sizing: border-box; }
@@ -19,8 +19,8 @@ body {
 
 .thread-grid {
   background-image:
-    linear-gradient(rgba(67, 56, 202, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(67, 56, 202, 0.035) 1px, transparent 1px);
+    linear-gradient(rgba(30, 92, 200, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30, 92, 200, 0.045) 1px, transparent 1px);
   background-size: 30px 30px;
 }
 
@@ -43,7 +43,7 @@ body {
 
 .kografly-scrollbar::-webkit-scrollbar { width: 8px; }
 .kografly-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(79, 70, 229, .2);
+  background: rgba(30, 92, 200, .22);
   border-radius: 999px;
 }
 
@@ -53,4 +53,3 @@ body {
 .link-animation-wiggle { animation: k-wiggle 1.5s ease-in-out infinite; }
 .link-animation-bounce { animation: k-bounce-soft 1.8s ease-in-out infinite; }
 .link-animation-glow { animation: k-glow 2.3s ease-in-out infinite; }
-
