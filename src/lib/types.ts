@@ -1,4 +1,4 @@
-export type Json =
+﻿export type Json =
   | string
   | number
   | boolean
@@ -6,10 +6,20 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
+export type ProfileTemplateId = "kografly" | "popCreator" | "studioJahit" | "neoBrutal";
+
 export type ProfileTheme = {
-  accent?: "indigo" | "amber" | "teal";
-  buttonStyle?: "thread" | "minimal";
-  background?: "stone" | "ink" | "gradient";
+  template?: ProfileTemplateId;
+  background?: string;
+  surface?: string;
+  text?: string;
+  muted?: string;
+  accent?: string;
+  secondary?: string;
+  button?: string;
+  buttonText?: string;
+  decorative?: string;
+  buttonStyle?: "thread" | "minimal" | "poster" | "pill" | "brutal";
 };
 
 export type Profile = {
@@ -156,3 +166,4 @@ export type Database = {
     CompositeTypes: Record<string, never>;
   };
 };
+

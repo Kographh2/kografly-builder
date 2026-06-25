@@ -1,15 +1,16 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { ExternalLink, Loader2, LogOut, Plus, Save, UserRound } from "lucide-react";
+import { ExternalLink, Loader2, LogOut, Plus, RotateCcw, Save, UserRound } from "lucide-react";
 import AvatarUploader from "@/components/AvatarUploader";
 import LinkCardEditor from "@/components/LinkCardEditor";
 import PhonePreview from "@/components/PhonePreview";
 import RealtimeBadge from "@/components/RealtimeBadge";
+import { applyTemplate, normalizeTheme, profileTemplates, themeColorFields } from "@/constants/templates";
 import { supabase } from "@/lib/supabase/client";
-import type { KograflyLink, Profile } from "@/lib/types";
+import type { KograflyLink, Profile, ProfileTemplateId, ProfileTheme } from "@/lib/types";
 import { ensureUrl, getSiteUrl, isValidUsername, normalizeUsername } from "@/lib/utils";
 
 type UserState = { id: string; email?: string };
@@ -24,10 +25,10 @@ export default function BuilderClient() {
   const [connected, setConnected] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  const publicUrl = useMemo(() => profile ? `${getSiteUrl()}/${profile.username}` : "", [profile]);
+  const publicUrl = useMemo(() => (profile ? `${getSiteUrl()}/${profile.username}` : ""), [profile]);
+  const resolvedTheme = useMemo(() => normalizeTheme(profile?.theme), [profile?.theme]);
 
   useEffect(() => {
-    let profileChannel: ReturnType<typeof supabase.channel> | null = null;
     let mounted = true;
 
     async function boot() {
@@ -46,7 +47,6 @@ export default function BuilderClient() {
 
     return () => {
       mounted = false;
-      if (profileChannel) void supabase.removeChannel(profileChannel);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
@@ -73,9 +73,10 @@ export default function BuilderClient() {
     setLoading(true);
     const { data: profileData, error } = await supabase.from("profiles").select("*").eq("owner_id", userId).maybeSingle();
     if (error) setMessage(error.message);
-    if (profileData) {
-      setProfile(profileData);
-      await loadLinks(profileData.id);
+    const loadedProfile = profileData as Profile | null;
+    if (loadedProfile) {
+      setProfile({ ...loadedProfile, theme: normalizeTheme(loadedProfile.theme) });
+      await loadLinks(loadedProfile.id);
     }
     setLoading(false);
   }
@@ -86,7 +87,7 @@ export default function BuilderClient() {
       setMessage(error.message);
       return;
     }
-    setLinks(data || []);
+    setLinks(((data || []) as KograflyLink[]).sort((a, b) => a.sort_order - b.sort_order));
   }
 
   async function createProfile(usernameInput: string) {
@@ -105,7 +106,7 @@ export default function BuilderClient() {
         display_name: username.replace(/[._-]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
         bio: "Halo! Ini semua link penting saya di Kografly.",
         is_published: true,
-        theme: { accent: "indigo", buttonStyle: "thread", background: "stone" }
+        theme: applyTemplate(null, "kografly")
       })
       .select("*")
       .single();
@@ -114,7 +115,7 @@ export default function BuilderClient() {
       setMessage(error.message.includes("duplicate") ? "Username sudah dipakai." : error.message);
       return;
     }
-    setProfile(data);
+    setProfile(data as Profile);
     setLinks([]);
   }
 
@@ -134,7 +135,7 @@ export default function BuilderClient() {
         bio: profile.bio,
         avatar_url: profile.avatar_url,
         is_published: profile.is_published,
-        theme: profile.theme || { accent: "indigo", buttonStyle: "thread", background: "stone" }
+        theme: normalizeTheme(profile.theme)
       })
       .eq("id", profile.id)
       .select("*")
@@ -144,8 +145,8 @@ export default function BuilderClient() {
       setMessage(error.message.includes("duplicate") ? "Username sudah dipakai." : error.message);
       return;
     }
-    setMessage("Profile tersimpan dan public page akan update realtime.");
-    setProfile(data);
+    setMessage("Profile dan template tersimpan. Public page tetap update realtime tanpa badge realtime di tampilan visitor.");
+    setProfile(data as Profile);
   }
 
   async function addLink() {
@@ -170,11 +171,22 @@ export default function BuilderClient() {
       setMessage(error.message);
       return;
     }
-    setLinks((current) => [...current, data].sort((a, b) => a.sort_order - b.sort_order));
+    setLinks((current) => [...current, data as KograflyLink].sort((a, b) => a.sort_order - b.sort_order));
   }
 
   function updateLocalLink(next: KograflyLink) {
     setLinks((current) => current.map((item) => (item.id === next.id ? next : item)).sort((a, b) => a.sort_order - b.sort_order));
+  }
+
+  function updateTheme(next: Partial<ProfileTheme>) {
+    if (!profile) return;
+    setProfile({ ...profile, theme: { ...normalizeTheme(profile.theme), ...next } });
+  }
+
+  function selectTemplate(templateId: ProfileTemplateId) {
+    if (!profile) return;
+    setProfile({ ...profile, theme: applyTemplate(profile.theme, templateId) });
+    setMessage("Template diganti di preview. Klik Simpan profile kalau sudah cocok.");
   }
 
   async function saveLink(link: KograflyLink) {
@@ -191,7 +203,7 @@ export default function BuilderClient() {
       })
       .eq("id", link.id);
     if (error) setMessage(error.message);
-    else setMessage(`Link “${link.title}” tersimpan.`);
+    else setMessage(`Link â€œ${link.title}â€ tersimpan.`);
   }
 
   async function deleteLink(link: KograflyLink) {
@@ -240,7 +252,9 @@ export default function BuilderClient() {
           <div>
             <p className="text-sm font-bold uppercase tracking-[.25em] text-kografly-amber">Kografly Builder</p>
             <h1 className="font-serif text-4xl font-bold text-stone-950">Editor bio-link</h1>
-            <p className="mt-1 text-sm text-stone-500">Public URL: <a className="font-bold text-kografly-indigo" href={publicUrl} target="_blank" rel="noreferrer">{publicUrl}</a></p>
+            <p className="mt-1 text-sm text-stone-500">
+              Public URL: <a className="font-bold text-kografly-indigo" href={publicUrl} target="_blank" rel="noreferrer">{publicUrl}</a>
+            </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <RealtimeBadge connected={connected} />
@@ -252,7 +266,7 @@ export default function BuilderClient() {
 
         {message && <p className="mb-5 rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-sm font-semibold text-kografly-amber">{message}</p>}
 
-        <div className="grid gap-8 lg:grid-cols-[1fr_410px]">
+        <div className="grid items-start gap-8 lg:grid-cols-[1fr_410px]">
           <section className="space-y-6">
             <article className="rounded-[2rem] border border-stone-200 bg-white p-6 shadow-soft">
               <div className="mb-5 flex items-start justify-between gap-4">
@@ -289,11 +303,19 @@ export default function BuilderClient() {
                 <span className="mb-2 block text-sm font-bold text-stone-700">Bio</span>
                 <textarea value={profile.bio || ""} onChange={(e) => setProfile({ ...profile, bio: e.target.value })} rows={4} className="w-full rounded-2xl border border-stone-200 px-4 py-3 outline-none focus:border-kografly-indigo" />
               </label>
-              <button onClick={saveProfile} disabled={saving} className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-kografly-indigo px-5 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5 disabled:opacity-70">
-                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                Simpan profile
-              </button>
             </article>
+
+            <ThemeEditor
+              theme={resolvedTheme}
+              onTemplateChange={selectTemplate}
+              onThemeChange={updateTheme}
+              onResetTemplate={() => selectTemplate(resolvedTheme.template)}
+            />
+
+            <button onClick={saveProfile} disabled={saving} className="inline-flex items-center gap-2 rounded-2xl bg-kografly-indigo px-5 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5 disabled:opacity-70">
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              Simpan profile & template
+            </button>
 
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -306,7 +328,7 @@ export default function BuilderClient() {
             </div>
 
             {links.length ? (
-              links.sort((a, b) => a.sort_order - b.sort_order).map((link) => (
+              [...links].sort((a, b) => a.sort_order - b.sort_order).map((link) => (
                 <LinkCardEditor
                   key={link.id}
                   link={link}
@@ -324,10 +346,83 @@ export default function BuilderClient() {
             )}
           </section>
 
-          <PhonePreview profile={profile} links={links} />
+          <div>
+            <p className="mb-3 text-center text-xs font-bold uppercase tracking-[.2em] text-stone-400">Preview sebelum disimpan</p>
+            <PhonePreview profile={profile} links={links} />
+          </div>
         </div>
       </div>
     </main>
+  );
+}
+
+function ThemeEditor({
+  theme,
+  onTemplateChange,
+  onThemeChange,
+  onResetTemplate
+}: {
+  theme: ReturnType<typeof normalizeTheme>;
+  onTemplateChange: (templateId: ProfileTemplateId) => void;
+  onThemeChange: (next: Partial<ProfileTheme>) => void;
+  onResetTemplate: () => void;
+}) {
+  return (
+    <article className="rounded-[2rem] border border-stone-200 bg-white p-6 shadow-soft">
+      <div className="mb-5 flex flex-col justify-between gap-3 md:flex-row md:items-end">
+        <div>
+          <p className="text-sm font-bold uppercase tracking-[.2em] text-kografly-teal">Template</p>
+          <h2 className="font-serif text-3xl font-bold text-stone-950">Pilih style public page</h2>
+          <p className="mt-1 text-sm text-stone-500">Klik template untuk melihat preview dulu. Perubahan baru permanen setelah klik simpan.</p>
+        </div>
+        <button onClick={onResetTemplate} className="inline-flex items-center gap-2 rounded-full border border-stone-200 px-4 py-2 text-sm font-bold text-stone-600 hover:border-kografly-indigo hover:text-kografly-indigo">
+          <RotateCcw className="h-4 w-4" /> Reset warna template
+        </button>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        {profileTemplates.map((template) => {
+          const active = theme.template === template.id;
+          return (
+            <button
+              key={template.id}
+              onClick={() => onTemplateChange(template.id)}
+              className={`overflow-hidden rounded-[1.5rem] border p-3 text-left transition hover:-translate-y-0.5 ${active ? "border-kografly-indigo ring-2 ring-indigo-100" : "border-stone-200"}`}
+            >
+              <div className={`h-24 rounded-[1rem] ${template.previewClass}`}>
+                <div className="flex h-full flex-col justify-end gap-1 p-3">
+                  <div className="h-3 w-16 rounded-full bg-white/90" />
+                  <div className="h-3 w-24 rounded-full bg-white/70" />
+                </div>
+              </div>
+              <p className="mt-3 font-bold text-stone-950">{template.name}</p>
+              <p className="mt-1 text-xs leading-5 text-stone-500">{template.description}</p>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="mt-6 grid gap-4 md:grid-cols-3">
+        {themeColorFields.map((field) => (
+          <label key={field.key} className="rounded-2xl border border-stone-200 p-3">
+            <span className="mb-2 block text-xs font-bold uppercase tracking-[.16em] text-stone-500">{field.label}</span>
+            <div className="flex items-center gap-3">
+              <input
+                type="color"
+                value={theme[field.key].startsWith("#") ? theme[field.key] : "#000000"}
+                onChange={(e) => onThemeChange({ [field.key]: e.target.value } as Partial<ProfileTheme>)}
+                className="h-10 w-12 rounded-lg border border-stone-200 bg-white p-1"
+              />
+              <input
+                value={theme[field.key]}
+                onChange={(e) => onThemeChange({ [field.key]: e.target.value } as Partial<ProfileTheme>)}
+                className="min-w-0 flex-1 rounded-xl border border-stone-200 px-3 py-2 text-sm font-semibold outline-none focus:border-kografly-indigo"
+              />
+            </div>
+          </label>
+        ))}
+      </div>
+    </article>
   );
 }
 
@@ -351,3 +446,4 @@ function CreateProfile({ saving, message, onCreate }: { saving: boolean; message
     </main>
   );
 }
+

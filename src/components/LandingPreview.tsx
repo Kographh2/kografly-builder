@@ -1,4 +1,4 @@
-import IconRenderer from "@/components/IconRenderer";
+﻿import IconRenderer from "@/components/IconRenderer";
 
 const previewLinks = [
   { title: "Latest Drop", icon: "Instagram", className: "bg-stone-950 text-white" },
@@ -17,18 +17,11 @@ export default function LandingPreview() {
           </div>
           <h2 className="mt-4 font-serif text-3xl font-bold">Kografly Studio</h2>
           <p className="mt-1 text-sm font-semibold text-kografly-indigo">/studio</p>
-          <p className="mx-auto mt-3 max-w-[260px] text-sm leading-6 text-stone-600">
-            Bio link yang terasa personal, rapi, dan bisa dipantau realtime.
-          </p>
+          <p className="mx-auto mt-3 max-w-[260px] text-sm leading-6 text-stone-600">Bio link yang terasa personal, rapi, dan bisa dipantau realtime.</p>
         </div>
-
         <div className="mt-7 space-y-3">
           {previewLinks.map((link, index) => (
-            <div
-              key={link.title}
-              className={`thread-indent flex items-center gap-3 rounded-[1.35rem] border border-stone-200 px-4 py-3 shadow-soft ${link.className}`}
-              style={{ marginLeft: index > 1 ? 24 : 0 }}
-            >
+            <div key={link.title} className={`thread-indent flex items-center gap-3 rounded-[1.35rem] border border-stone-200 px-4 py-3 shadow-soft ${link.className}`} style={{ marginLeft: index > 1 ? 24 : 0 }}>
               <IconRenderer name={link.icon} className="h-5 w-5" />
               <span className="font-bold">{link.title}</span>
             </div>
@@ -38,3 +31,4 @@ export default function LandingPreview() {
     </div>
   );
 }
+

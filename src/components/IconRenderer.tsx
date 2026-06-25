@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as LucideIcons from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -9,8 +9,6 @@ type Props = {
   strokeWidth?: number;
 };
 
-// Lucide tidak menyediakan brand logo resmi untuk semua sosial media.
-// Label tetap bisa Instagram/GitHub/YouTube, tapi icon-nya diarahkan ke icon Lucide generik yang tersedia.
 const ICON_ALIASES: Record<string, string> = {
   Website: "Globe2",
   Instagram: "Camera",
@@ -38,14 +36,10 @@ const ICON_ALIASES: Record<string, string> = {
   Community: "MessageCircle"
 };
 
-export default function IconRenderer({
-  name = "Globe2",
-  className = "h-5 w-5",
-  strokeWidth = 2
-}: Props) {
+export default function IconRenderer({ name = "Globe2", className = "h-5 w-5", strokeWidth = 2 }: Props) {
   const iconMap = LucideIcons as unknown as Record<string, LucideIcon>;
   const aliasedName = ICON_ALIASES[name || "Globe2"] || name || "Globe2";
   const Icon = iconMap[aliasedName] || iconMap.Globe2 || iconMap.Link;
-
   return <Icon className={className} strokeWidth={strokeWidth} />;
 }
+
