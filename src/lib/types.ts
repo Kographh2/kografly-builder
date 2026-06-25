@@ -1,4 +1,10 @@
-export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[];
 
 export type ProfileTheme = {
   accent?: "indigo" | "amber" | "teal";
@@ -19,6 +25,16 @@ export type Profile = {
   updated_at: string;
 };
 
+export type LinkAnimation =
+  | "none"
+  | "rise"
+  | "pulse"
+  | "wiggle"
+  | "bounce"
+  | "glow";
+
+export type LinkStyleVariant = "solid" | "outline" | "soft" | "glass";
+
 export type KograflyLink = {
   id: string;
   profile_id: string;
@@ -34,8 +50,6 @@ export type KograflyLink = {
   updated_at: string;
 };
 
-export type LinkAnimation = "none" | "rise" | "pulse" | "wiggle" | "bounce" | "glow";
-export type LinkStyleVariant = "solid" | "outline" | "soft" | "glass";
 export type AnalyticsType = "view" | "click";
 
 export type AnalyticsEvent = {
@@ -53,27 +67,87 @@ export type Database = {
     Tables: {
       profiles: {
         Row: Profile;
-        Insert: Partial<Omit<Profile, "id" | "created_at" | "updated_at">> & {
+        Insert: {
+          id?: string;
           owner_id: string;
           username: string;
+          display_name?: string;
+          bio?: string | null;
+          avatar_url?: string | null;
+          is_published?: boolean;
+          theme?: ProfileTheme | null;
+          created_at?: string;
+          updated_at?: string;
         };
-        Update: Partial<Omit<Profile, "id" | "owner_id" | "created_at" | "updated_at">>;
+        Update: {
+          id?: string;
+          owner_id?: string;
+          username?: string;
+          display_name?: string;
+          bio?: string | null;
+          avatar_url?: string | null;
+          is_published?: boolean;
+          theme?: ProfileTheme | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
       };
+
       links: {
         Row: KograflyLink;
-        Insert: Partial<Omit<KograflyLink, "id" | "created_at" | "updated_at">> & {
+        Insert: {
+          id?: string;
           profile_id: string;
           owner_id: string;
+          title?: string;
+          url?: string;
+          icon_name?: string;
+          animation?: LinkAnimation;
+          style_variant?: LinkStyleVariant;
+          sort_order?: number;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
         };
-        Update: Partial<Omit<KograflyLink, "id" | "profile_id" | "owner_id" | "created_at" | "updated_at">>;
+        Update: {
+          id?: string;
+          profile_id?: string;
+          owner_id?: string;
+          title?: string;
+          url?: string;
+          icon_name?: string;
+          animation?: LinkAnimation;
+          style_variant?: LinkStyleVariant;
+          sort_order?: number;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
       };
+
       analytics_events: {
         Row: AnalyticsEvent;
-        Insert: Partial<Omit<AnalyticsEvent, "id" | "created_at">> & {
+        Insert: {
+          id?: string;
           profile_id: string;
+          link_id?: string | null;
           type: AnalyticsType;
+          referrer?: string | null;
+          user_agent?: string | null;
+          created_at?: string;
         };
-        Update: never;
+        Update: {
+          id?: string;
+          profile_id?: string;
+          link_id?: string | null;
+          type?: AnalyticsType;
+          referrer?: string | null;
+          user_agent?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
       };
     };
     Views: Record<string, never>;
