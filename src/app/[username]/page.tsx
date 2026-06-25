@@ -1,14 +1,25 @@
 import { notFound } from "next/navigation";
 import PublicProfile from "@/components/PublicProfile";
 import { supabaseAdmin } from "@/lib/supabase/server";
+import type { KograflyLink, Profile } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
-type Props = { params: Promise<{ username: string }> };
+type Props = {
+  params: Promise<{
+    username: string;
+  }>;
+};
+
+type MetadataProfile = Pick<
+  Profile,
+  "display_name" | "bio" | "avatar_url" | "username"
+>;
 
 export async function generateMetadata({ params }: Props) {
   const { username: rawUsername } = await params;
   const username = rawUsername.toLowerCase();
+
   const { data } = await supabaseAdmin
     .from("profiles")
     .select("display_name,bio,avatar_url,username")
@@ -16,14 +27,22 @@ export async function generateMetadata({ params }: Props) {
     .eq("is_published", true)
     .maybeSingle();
 
-  if (!data) return { title: "Kografly" };
+  const profile = data as MetadataProfile | null;
+
+  if (!profile) {
+    return {
+      title: "Kografly"
+    };
+  }
+
   return {
-    title: `${data.display_name} / Kografly`,
-    description: data.bio || `Lihat semua link ${data.display_name} di Kografly`,
+    title: `${profile.display_name} / Kografly`,
+    description:
+      profile.bio || `Lihat semua link ${profile.display_name} di Kografly`,
     openGraph: {
-      title: `${data.display_name} / Kografly`,
-      description: data.bio || undefined,
-      images: data.avatar_url ? [data.avatar_url] : []
+      title: `${profile.display_name} / Kografly`,
+      description: profile.bio || undefined,
+      images: profile.avatar_url ? [profile.avatar_url] : []
     }
   };
 }
@@ -31,21 +50,28 @@ export async function generateMetadata({ params }: Props) {
 export default async function UsernamePage({ params }: Props) {
   const { username: rawUsername } = await params;
   const username = rawUsername.toLowerCase();
-  const { data: profile } = await supabaseAdmin
+
+  const { data: profileData } = await supabaseAdmin
     .from("profiles")
     .select("*")
     .eq("username", username)
     .eq("is_published", true)
     .maybeSingle();
 
-  if (!profile) notFound();
+  const profile = profileData as Profile | null;
 
-  const { data: links } = await supabaseAdmin
+  if (!profile) {
+    notFound();
+  }
+
+  const { data: linksData } = await supabaseAdmin
     .from("links")
     .select("*")
     .eq("profile_id", profile.id)
     .eq("is_active", true)
     .order("sort_order", { ascending: true });
 
-  return <PublicProfile initialProfile={profile} initialLinks={links || []} />;
+  const links = (linksData || []) as KograflyLink[];
+
+  return <PublicProfile initialProfile={profile} initialLinks={links} />;
 }
