@@ -53,7 +53,7 @@ Buka `http://localhost:3000`.
 
 ## Catatan deployment
 
-Untuk domain seperti `https://kografly.web.id/username`, deploy ke Vercel/hosting Next.js dan arahkan domain `kografly.web.id` ke deployment. Pastikan `NEXT_PUBLIC_SITE_URL=https://kografly.web.id`.
+Untuk domain seperti `https://kographh.web.id/username`, deploy ke Vercel/hosting Next.js dan arahkan domain `kographh.web.id` ke deployment. Pastikan `NEXT_PUBLIC_SITE_URL=https://kographh.web.id`.
 
 ## Struktur halaman
 

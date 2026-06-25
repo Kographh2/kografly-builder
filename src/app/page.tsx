@@ -27,7 +27,7 @@ export default function HomePage() {
         <div className="space-y-9">
           <div className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-white/80 px-4 py-2 text-sm font-medium text-kografly-indigo shadow-soft backdrop-blur">
             <Eye className="h-4 w-4" />
-            kografly.web.id/username — public bio link realtime
+            kographh.web.id/username — public bio link realtime
           </div>
 
           <div className="space-y-5">

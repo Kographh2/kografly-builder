@@ -64,7 +64,7 @@ export default function UsernameClaim() {
         </button>
       </div>
       <div className="px-3 pb-2 pt-3 text-sm">
-        {status === "idle" && <p className="text-stone-500">Preview URL: kografly.web.id/{normalized || "username"}</p>}
+        {status === "idle" && <p className="text-stone-500">Preview URL: kographh.web.id/{normalized || "username"}</p>}
         {status === "invalid" && <p className="text-kografly-error">Username minimal 3 karakter, gunakan huruf kecil, angka, titik, strip, atau underscore.</p>}
         {status === "taken" && <p className="text-kografly-error">Username ini sudah dipakai. Coba variasi lain.</p>}
         {status === "available" && <p className="text-kografly-success">Username tersedia. Mengarahkan ke akun...</p>}
