@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import ProfileCanvas from "@/components/ProfileCanvas";
 import { supabase } from "@/lib/supabase/client";
 import type { KograflyLink, Profile } from "@/lib/types";
@@ -18,6 +18,7 @@ export default function PublicProfile({ initialProfile, initialLinks }: Props) {
   useEffect(() => {
     if (trackedView.current) return;
     trackedView.current = true;
+
     void fetch("/api/track/view", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -29,24 +30,19 @@ export default function PublicProfile({ initialProfile, initialLinks }: Props) {
   useEffect(() => {
     const channel = supabase
       .channel(`public-profile:${initialProfile.id}`)
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "profiles", filter: `id=eq.${initialProfile.id}` },
-        (payload) => setProfile(payload.new as Profile)
-      )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "links", filter: `profile_id=eq.${initialProfile.id}` },
-        async () => {
-          const { data } = await supabase
-            .from("links")
-            .select("*")
-            .eq("profile_id", initialProfile.id)
-            .eq("is_active", true)
-            .order("sort_order", { ascending: true });
-          setLinks((data || []) as KograflyLink[]);
-        }
-      )
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles", filter: `id=eq.${initialProfile.id}` }, (payload) => {
+        setProfile(payload.new as Profile);
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "links", filter: `profile_id=eq.${initialProfile.id}` }, async () => {
+        const { data } = await supabase
+          .from("links")
+          .select("*")
+          .eq("profile_id", initialProfile.id)
+          .eq("is_active", true)
+          .order("sort_order", { ascending: true });
+
+        setLinks((data || []) as KograflyLink[]);
+      })
       .subscribe();
 
     return () => {
@@ -54,12 +50,16 @@ export default function PublicProfile({ initialProfile, initialLinks }: Props) {
     };
   }, [initialProfile.id]);
 
+  const sortedLinks = useMemo(() => links.filter((link) => link.is_active).sort((a, b) => a.sort_order - b.sort_order), [links]);
+
   function trackClick(link: KograflyLink) {
     const payload = JSON.stringify({ profile_id: profile.id, link_id: link.id });
+
     if (navigator.sendBeacon) {
       navigator.sendBeacon("/api/track/click", new Blob([payload], { type: "application/json" }));
       return;
     }
+
     void fetch("/api/track/click", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -68,10 +68,6 @@ export default function PublicProfile({ initialProfile, initialLinks }: Props) {
     });
   }
 
-  return (
-    <main className="min-h-screen">
-      <ProfileCanvas profile={profile} links={links} onTrackClick={trackClick} />
-    </main>
-  );
+  return <ProfileCanvas profile={profile} links={sortedLinks} onTrackClick={trackClick} />;
 }
 

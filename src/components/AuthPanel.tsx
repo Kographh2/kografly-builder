@@ -47,7 +47,7 @@ export default function AuthPanel({ initialUsername }: Props) {
       display_name: finalUsername.replace(/[._-]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
       bio: "Halo! Ini semua link penting saya di Kografly.",
       is_published: true,
-      theme: { accent: "indigo", buttonStyle: "thread", background: "stone" }
+      theme: { accent: "indigo", buttonStyle: "soft", background: "stone" }
     });
 
     if (error) {

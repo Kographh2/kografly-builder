@@ -6,10 +6,8 @@
   | { [key: string]: Json | undefined }
   | Json[];
 
-export type ProfileTemplateId = "kografly" | "popCreator" | "studioJahit" | "neoBrutal";
-
 export type ProfileTheme = {
-  template?: ProfileTemplateId;
+  template?: "standard";
   background?: string;
   surface?: string;
   text?: string;
@@ -19,7 +17,7 @@ export type ProfileTheme = {
   button?: string;
   buttonText?: string;
   decorative?: string;
-  buttonStyle?: "thread" | "minimal" | "poster" | "pill" | "brutal";
+  buttonStyle?: "solid" | "outline" | "soft" | "glass";
 };
 
 export type Profile = {
@@ -103,7 +101,6 @@ export type Database = {
         };
         Relationships: [];
       };
-
       links: {
         Row: KograflyLink;
         Insert: {
@@ -136,7 +133,6 @@ export type Database = {
         };
         Relationships: [];
       };
-
       analytics_events: {
         Row: AnalyticsEvent;
         Insert: {

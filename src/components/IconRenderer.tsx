@@ -27,7 +27,7 @@ const ICON_ALIASES: Record<string, string> = {
   Telegram: "Send",
   WhatsApp: "MessageCircle",
   Discord: "MessagesSquare",
-  Portfolio: "Camera",
+  Portfolio: "BriefcaseBusiness",
   Email: "Mail",
   Shop: "ShoppingBag",
   Social: "AtSign",
@@ -40,6 +40,7 @@ export default function IconRenderer({ name = "Globe2", className = "h-5 w-5", s
   const iconMap = LucideIcons as unknown as Record<string, LucideIcon>;
   const aliasedName = ICON_ALIASES[name || "Globe2"] || name || "Globe2";
   const Icon = iconMap[aliasedName] || iconMap.Globe2 || iconMap.Link;
+
   return <Icon className={className} strokeWidth={strokeWidth} />;
 }
 

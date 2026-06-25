@@ -1,13 +1,12 @@
-@tailwind base;
+﻿@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
   --kografly-indigo: #4338ca;
-  --kografly-amber: #d97706;
   --kografly-teal: #0f766e;
-  --kografly-bg: #fafaf9;
-  --kografly-ink: #1c1917;
+  --kografly-bg: #f7f3ec;
+  --kografly-ink: #18181b;
 }
 
 * { box-sizing: border-box; }
@@ -20,9 +19,9 @@ body {
 
 .thread-grid {
   background-image:
-    linear-gradient(rgba(67, 56, 202, 0.065) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(67, 56, 202, 0.065) 1px, transparent 1px);
-  background-size: 28px 28px;
+    linear-gradient(rgba(67, 56, 202, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(67, 56, 202, 0.035) 1px, transparent 1px);
+  background-size: 30px 30px;
 }
 
 .thread-indent {
@@ -39,12 +38,12 @@ body {
   width: 2px;
   border-radius: 999px;
   background: linear-gradient(var(--kografly-indigo), var(--kografly-teal));
-  opacity: .25;
+  opacity: .18;
 }
 
 .kografly-scrollbar::-webkit-scrollbar { width: 8px; }
 .kografly-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(67, 56, 202, .24);
+  background: rgba(79, 70, 229, .2);
   border-radius: 999px;
 }
 
@@ -54,3 +53,4 @@ body {
 .link-animation-wiggle { animation: k-wiggle 1.5s ease-in-out infinite; }
 .link-animation-bounce { animation: k-bounce-soft 1.8s ease-in-out infinite; }
 .link-animation-glow { animation: k-glow 2.3s ease-in-out infinite; }
+

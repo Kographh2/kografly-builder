@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+﻿import { notFound } from "next/navigation";
 import PublicProfile from "@/components/PublicProfile";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import type { KograflyLink, Profile } from "@/lib/types";
@@ -11,10 +11,7 @@ type Props = {
   }>;
 };
 
-type MetadataProfile = Pick<
-  Profile,
-  "display_name" | "bio" | "avatar_url" | "username"
->;
+type MetadataProfile = Pick<Profile, "display_name" | "bio" | "avatar_url" | "username">;
 
 export async function generateMetadata({ params }: Props) {
   const { username: rawUsername } = await params;
@@ -30,15 +27,12 @@ export async function generateMetadata({ params }: Props) {
   const profile = data as MetadataProfile | null;
 
   if (!profile) {
-    return {
-      title: "Kografly"
-    };
+    return { title: "Kografly" };
   }
 
   return {
     title: `${profile.display_name} / Kografly`,
-    description:
-      profile.bio || `Lihat semua link ${profile.display_name} di Kografly`,
+    description: profile.bio || `Lihat semua link ${profile.display_name} di Kografly`,
     openGraph: {
       title: `${profile.display_name} / Kografly`,
       description: profile.bio || undefined,
@@ -75,3 +69,4 @@ export default async function UsernamePage({ params }: Props) {
 
   return <PublicProfile initialProfile={profile} initialLinks={links} />;
 }
+
