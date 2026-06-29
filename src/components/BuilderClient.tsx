@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { ExternalLink, Loader2, LogOut, Plus, Save, UserRound } from "lucide-react";
 import AvatarUploader from "@/components/AvatarUploader";
+import KograflyMascot from "@/components/KograflyMascot";
 import LinkCardEditor from "@/components/LinkCardEditor";
 import PhonePreview from "@/components/PhonePreview";
 import RealtimeBadge from "@/components/RealtimeBadge";
@@ -188,7 +189,7 @@ export default function BuilderClient() {
         url: "https://example.com",
         icon_name: links.length === 0 ? "Instagram" : "Globe2",
         animation: "rise",
-        style_variant: "solid",
+        style_variant: "soft",
         sort_order: nextOrder,
         is_active: true
       })
@@ -336,8 +337,10 @@ export default function BuilderClient() {
                       resolved.template.id === template.id ? "border-blue-600 ring-4 ring-blue-100" : "border-slate-200"
                     )}
                   >
-                    <div className="h-24 overflow-hidden rounded-[1.2rem]" style={{ background: `linear-gradient(135deg, ${template.palette.accent}, ${template.palette.secondary})` }}>
-                      <div className="h-full w-full bg-[radial-gradient(circle_at_80%_30%,rgba(255,255,255,.45),transparent_30%),linear-gradient(to_top,rgba(255,255,255,.92),transparent_55%)]" />
+                    <div className="relative h-24 overflow-hidden rounded-[1.2rem]" style={{ background: `linear-gradient(135deg, ${template.palette.soft}, ${template.palette.background})` }}>
+                      <div className="absolute inset-x-3 bottom-2 top-3 rounded-2xl border border-white/70 bg-white/70 shadow-sm" />
+                      <div className="absolute left-4 top-4 h-8 w-8 rounded-xl" style={{ background: template.palette.accent }} />
+                      <KograflyMascot templateId={template.id} mascotId={template.mascot} className="absolute bottom-0 right-2 h-[92px] w-[92px] object-contain" />
                     </div>
                     <p className="mt-3 font-black text-slate-950">{template.name}</p>
                     <p className="text-xs font-semibold text-slate-500">{template.role}</p>

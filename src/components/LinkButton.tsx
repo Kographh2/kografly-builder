@@ -32,27 +32,26 @@ export default function LinkButton({
   className,
   style
 }: Props) {
-  const visualStyle = buttonStyle || link.style_variant || "solid";
+  const visualStyle = buttonStyle || link.style_variant || "soft";
 
   const content = (
     <>
-      <span className="k-link-icon">
-        <IconRenderer name={link.icon_name} className={compact ? "h-4 w-4" : "h-5 w-5"} />
+      <span className="k-link-icon" aria-hidden="true">
+        <IconRenderer name={link.icon_name} className={compact ? "h-[18px] w-[18px]" : "h-5 w-5"} />
       </span>
       <span className="min-w-0 flex-1 text-left">
         <span className="block truncate font-extrabold tracking-tight">{link.title}</span>
-        {!compact && <span className="block truncate text-xs font-semibold opacity-60">Buka link</span>}
       </span>
-      <span className="k-link-arrow">
+      <span className="k-link-arrow" aria-hidden="true">
         <ChevronRight className="h-5 w-5" />
       </span>
     </>
   );
 
   const classes = cn(
-    "kografly-link group flex w-full items-center gap-3 rounded-[1.55rem] px-4 text-sm transition duration-200",
-    compact ? "min-h-[58px] py-2.5" : "min-h-[76px] py-3.5",
-    variantClass[visualStyle] || variantClass.solid,
+    "kografly-link group flex w-full items-center gap-3 text-sm transition duration-200 sm:text-[15px]",
+    compact ? "min-h-[58px] rounded-[1.25rem] px-3 py-2.5" : "min-h-[66px] rounded-[1.45rem] px-4 py-3",
+    variantClass[visualStyle] || variantClass.soft,
     `link-animation-${link.animation}`,
     className
   );

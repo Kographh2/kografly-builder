@@ -13,11 +13,14 @@
 }
 
 html {
+  min-width: 320px;
   scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
+  min-width: 320px;
+  overflow-x: hidden;
   background: #f8fbff;
   color: #0f172a;
 }
@@ -27,6 +30,18 @@ input,
 textarea,
 select {
   font: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
 }
 
 .kografly-page-grid {
@@ -47,23 +62,36 @@ select {
 
 .kografly-canvas {
   isolation: isolate;
+  container-type: inline-size;
 }
 
 .kografly-link {
-  border: 1px solid rgba(15, 23, 42, 0.08);
+  position: relative;
+  isolation: isolate;
+  border: 1px solid rgba(15, 23, 42, 0.075);
   transform-origin: center;
   will-change: transform;
 }
 
+.kografly-link::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255,255,255,.24), rgba(255,255,255,0));
+  pointer-events: none;
+}
+
 .kografly-link:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
 }
 
 .k-link-icon {
   display: grid;
   place-items: center;
-  width: 3rem;
-  height: 3rem;
+  width: 2.65rem;
+  height: 2.65rem;
   flex: none;
   border-radius: 1rem;
 }
@@ -71,8 +99,8 @@ select {
 .k-link-arrow {
   display: grid;
   place-items: center;
-  width: 2.3rem;
-  height: 2.3rem;
+  width: 2.25rem;
+  height: 2.25rem;
   flex: none;
   border-radius: 999px;
 }
@@ -80,7 +108,7 @@ select {
 .k-link-solid {
   background: var(--k-button);
   color: var(--k-button-text);
-  box-shadow: 0 16px 35px color-mix(in srgb, var(--k-accent), transparent 72%);
+  box-shadow: 0 16px 34px color-mix(in srgb, var(--k-accent), transparent 72%);
 }
 
 .k-link-solid .k-link-icon,
@@ -102,9 +130,9 @@ select {
 }
 
 .k-link-soft {
-  background: rgba(255, 255, 255, 0.86);
+  background: rgba(255, 255, 255, 0.88);
   color: var(--k-text);
-  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.075);
 }
 
 .k-link-soft .k-link-icon {
@@ -120,15 +148,19 @@ select {
 .k-link-glass {
   background: rgba(255, 255, 255, 0.62);
   color: var(--k-text);
-  border-color: rgba(255, 255, 255, 0.75);
+  border-color: rgba(255, 255, 255, 0.74);
   backdrop-filter: blur(18px);
-  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.075);
 }
 
 .k-link-glass .k-link-icon,
 .k-link-glass .k-link-arrow {
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.72);
   color: var(--k-accent);
+}
+
+.k-built-with {
+  width: fit-content;
 }
 
 .link-animation-rise {
@@ -167,4 +199,43 @@ select {
 .kografly-scrollbar::-webkit-scrollbar-thumb {
   background: rgba(100, 116, 139, .35);
   border-radius: 999px;
+}
+
+@keyframes k-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes k-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.018); }
+}
+
+@keyframes k-wiggle {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(-1deg); }
+  75% { transform: rotate(1deg); }
+}
+
+@keyframes k-bounce-soft {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes k-glow {
+  0%, 100% { box-shadow: 0 14px 30px rgba(15, 23, 42, 0.075); }
+  50% { box-shadow: 0 18px 40px color-mix(in srgb, var(--k-accent), transparent 72%); }
+}
+
+@media (max-width: 420px) {
+  .k-link-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: .9rem;
+  }
+
+  .k-link-arrow {
+    width: 2.05rem;
+    height: 2.05rem;
+  }
 }

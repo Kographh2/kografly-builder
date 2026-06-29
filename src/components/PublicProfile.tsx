@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ExternalLink, Radio } from "lucide-react";
 import ProfileCanvas from "@/components/ProfileCanvas";
+import { getResolvedTheme } from "@/constants/templates";
 import { supabase } from "@/lib/supabase/client";
 import type { KograflyLink, Profile } from "@/lib/types";
 
@@ -69,12 +69,14 @@ export default function PublicProfile({
     });
   }
 
+  const { values } = getResolvedTheme(profile.theme);
+
   return (
-    <main className="min-h-screen bg-[#F8FBFF] px-0 py-0 sm:px-4 sm:py-6">
+    <main
+      className="min-h-[100dvh] px-0 py-0 sm:px-4 sm:py-6"
+      style={{ background: `linear-gradient(180deg, ${values.soft}, ${values.background})` }}
+    >
       <ProfileCanvas profile={profile} links={sortedLinks} onTrackClick={trackClick} />
-      <a href="/" className="mx-auto mb-8 mt-6 flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-5 py-3 text-sm font-bold text-slate-700 shadow-[0_12px_35px_rgba(15,23,42,0.08)] backdrop-blur transition hover:-translate-y-0.5 hover:text-blue-700">
-        <Radio className="h-4 w-4 text-emerald-600" /> Built with Kografly <ExternalLink className="h-4 w-4" />
-      </a>
     </main>
   );
 }

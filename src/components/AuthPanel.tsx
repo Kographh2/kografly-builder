@@ -45,9 +45,9 @@ export default function AuthPanel({ initialUsername }: Props) {
       owner_id: userId,
       username: finalUsername,
       display_name: finalUsername.replace(/[._-]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-      bio: "Halo! Ini semua link penting saya di Kografly.",
+      bio: "Semua link penting saya ada di sini.",
       is_published: true,
-      theme: { template: "blue-guide", mascot: "blue-guide-owl", buttonStyle: "solid" }
+      theme: { template: "blue-guide", mascot: "blue-guide-owl" }
     });
 
     if (error) {
