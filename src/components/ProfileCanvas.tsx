@@ -106,10 +106,15 @@ export default function ProfileCanvas({
         </div>
       </section>
 
-      <footer className={cn("relative z-10 mt-auto px-5", compact ? "pb-5 pt-2" : "pb-8 pt-4")}>
+      <footer
+        className={cn(
+          "relative z-10 mt-auto flex w-full justify-center px-5",
+          compact ? "pb-5 pt-2" : "pb-8 pt-4"
+        )}
+      >
         <a
           href="/"
-          className="k-built-with mx-auto inline-flex max-w-full items-center justify-center gap-2 rounded-full border border-[var(--k-secondary)]/35 bg-white/72 px-4 py-2.5 text-xs font-extrabold text-[var(--k-text)] shadow-[0_12px_28px_rgba(15,23,42,0.06)] backdrop-blur transition hover:-translate-y-0.5 hover:text-[var(--k-accent)]"
+          className="k-built-with inline-flex max-w-full items-center justify-center gap-2 rounded-full border border-[var(--k-secondary)]/35 bg-white/72 px-4 py-2.5 text-xs font-extrabold text-[var(--k-text)] shadow-[0_12px_28px_rgba(15,23,42,0.06)] backdrop-blur transition hover:-translate-y-0.5 hover:text-[var(--k-accent)]"
         >
           <Link2 className="h-4 w-4 text-[var(--k-accent)]" />
           <span>Built with Kografly</span>
