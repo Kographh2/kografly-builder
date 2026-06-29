@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useRef, useState } from "react";
 import { Camera, Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
@@ -41,9 +40,9 @@ export default function AvatarUploader({ userId, avatarUrl, displayName, onUploa
         className="relative grid h-24 w-24 place-items-center overflow-hidden rounded-full border-4 border-white bg-indigo-100 shadow-soft ring-1 ring-stone-200"
       >
         {avatarUrl ? (
-          <Image src={avatarUrl} alt={displayName} width={96} height={96} className="h-full w-full object-cover" />
+          <img src={avatarUrl} alt={displayName} className="h-full w-full object-cover" />
         ) : (
-          <span className="font-serif text-4xl font-bold text-kografly-indigo">{displayName.charAt(0) || "K"}</span>
+          <span className="text-4xl font-bold text-kografly-indigo">{displayName.charAt(0) || "K"}</span>
         )}
         <span className="absolute inset-x-0 bottom-0 flex items-center justify-center bg-stone-950/70 py-1 text-white">
           {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}

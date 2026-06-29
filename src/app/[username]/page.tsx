@@ -1,4 +1,4 @@
-﻿import { notFound } from "next/navigation";
+import { notFound } from "next/navigation";
 import PublicProfile from "@/components/PublicProfile";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import type { KograflyLink, Profile } from "@/lib/types";

@@ -1,71 +1,56 @@
 # Kografly Builder
 
-Kografly adalah starter project bio-link builder ala Linktree, tetapi dengan identitas visual sendiri: editorial, nested cards, serif title, dan warna Indigo/Amber/Teal yang terinspirasi dari `threadweave-DESIGN.md`.
+Kografly Builder adalah starter bio-link builder realtime berbasis Next.js App Router dan Supabase. Versi ini sudah memakai Kografly Standard UI dengan mascot dan template yang benar-benar dirender sebagai komponen React/CSS, bukan screenshot tempelan.
 
-## Fitur utama
+## Highlight versi ini
 
-- Landing page dengan input `/username`.
-- Auth email/password Supabase.
-- Builder realtime untuk profile, avatar, bio, dan link.
-- Public link di `https://kografly.web.id/username` atau lokal `http://localhost:3000/username`.
-- Icon picker khusus icon sosial/creator dari `lucide-react`.
-- Animasi per bio link: none, rise, pulse, wiggle, bounce, glow.
-- Preview live di halaman builder.
-- Dashboard analytics realtime: total views, total clicks, CTR, dan top link.
-- Link unlimited, tidak dibatasi 10.
-- Upload avatar via Supabase Storage.
-- Database schema + RLS policy disediakan.
+- 6 template Kografly Standard UI:
+  - Blue Guide
+  - Blue Connector
+  - Blue Supporter
+  - Green Guide
+  - Green Connector
+  - Green Supporter
+- Mascot asset sudah dipotong menjadi PNG transparent dan dipakai sebagai elemen hero.
+- Layout template dibuat dari component asli: header, hero, wave, cards, button list, trust strip, dan social dots.
+- Font utama Poppins.
+- Preview HP live sebelum disimpan.
+- Custom warna template: background, surface, text, muted, accent, secondary, button, button text, decorative, dan soft background.
+- Public page realtime tanpa badge “Realtime on”. Realtime tetap aktif di belakang layar.
+- Unlimited bio links.
+- Icon picker social/creator dari lucide-react dengan alias aman untuk icon brand seperti Github/Instagram/YouTube.
+- Analytics views/clicks dengan dashboard.
+- Upload avatar ke Supabase Storage.
 
 ## Cara menjalankan
 
-1. Install dependency:
-
 ```bash
 npm install
-```
-
-2. Buat project Supabase, lalu jalankan SQL di `supabase/schema.sql` lewat Supabase SQL Editor.
-
-3. Aktifkan Realtime untuk tabel `profiles`, `links`, dan `analytics_events`. SQL sudah mencoba menambahkan tabel-tabel ini ke publication Supabase Realtime, tetapi cek lagi di dashboard Supabase jika event realtime belum masuk.
-
-4. Buat file `.env.local` dari `.env.example`:
-
-```bash
 cp .env.example .env.local
-```
-
-Isi:
-
-```bash
-NEXT_PUBLIC_SUPABASE_URL=...
-NEXT_PUBLIC_SUPABASE_ANON_KEY=...
-SUPABASE_SERVICE_ROLE_KEY=...
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
-```
-
-5. Jalankan:
-
-```bash
 npm run dev
 ```
 
-Buka `http://localhost:3000`.
+Isi `.env.local`:
 
-## Catatan deployment
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+```
 
-Untuk domain seperti `https://kographh.web.id/username`, deploy ke Vercel/hosting Next.js dan arahkan domain `kographh.web.id` ke deployment. Pastikan `NEXT_PUBLIC_SITE_URL=https://kographh.web.id`.
+Lalu jalankan SQL di `supabase/schema.sql` lewat Supabase SQL Editor.
 
-## Struktur halaman
+## Build check
 
-- `/` landing page + form klaim username.
-- `/login?username=nama` login/signup lalu otomatis membuat profile.
-- `/builder` editor profile dan link.
-- `/dashboard` analytics realtime.
-- `/[username]` public profile.
+Project ini sudah dicek dengan:
 
-## Catatan keamanan
+```bash
+npm run build
+```
 
-- RLS sudah aktif untuk tabel utama.
-- Public hanya bisa membaca profile/link yang published/active.
-- Analytics hanya menyimpan event view/click, referrer, dan user agent pendek; tidak menyimpan IP.
-- Jangan expose `SUPABASE_SERVICE_ROLE_KEY` ke client.
+Build berhasil menggunakan Next.js 16.2.9 di environment sandbox dengan env dummy.
+
+## Catatan font
+
+Poppins dipanggil lewat CSS import Google Fonts di `src/app/globals.css` agar build tidak gagal saat environment offline. Browser akan memuat Poppins saat runtime.

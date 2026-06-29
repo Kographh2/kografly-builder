@@ -1,77 +1,60 @@
-﻿"use client";
+"use client";
 
-import IconRenderer from "@/components/IconRenderer";
 import type { CSSProperties } from "react";
-import { hexToRgba, normalizeTheme, type ResolvedProfileTheme } from "@/constants/templates";
-import type { KograflyLink, ProfileTheme } from "@/lib/types";
+import { ChevronRight } from "lucide-react";
+import IconRenderer from "@/components/IconRenderer";
+import type { KograflyLink } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 type Props = {
   link: KograflyLink;
   preview?: boolean;
-  theme?: ProfileTheme | ResolvedProfileTheme | null;
   onTrackClick?: (link: KograflyLink) => void;
+  buttonStyle?: "solid" | "outline" | "soft" | "glass";
+  compact?: boolean;
+  className?: string;
+  style?: CSSProperties;
 };
 
-function getButtonStyle(link: KograflyLink, theme: ResolvedProfileTheme): CSSProperties {
-  const variant = link.style_variant || theme.buttonStyle;
+const variantClass: Record<string, string> = {
+  solid: "k-link-solid",
+  outline: "k-link-outline",
+  soft: "k-link-soft",
+  glass: "k-link-glass"
+};
 
-  if (variant === "outline") {
-    return {
-      background: hexToRgba(theme.surface, 0.62),
-      borderColor: hexToRgba(theme.button, 0.36),
-      color: theme.button
-    };
-  }
-
-  if (variant === "soft") {
-    return {
-      background: theme.button,
-      borderColor: hexToRgba(theme.accent, 0.08),
-      color: theme.buttonText,
-      boxShadow: `0 12px 28px ${hexToRgba(theme.accent, 0.08)}`
-    };
-  }
-
-  if (variant === "glass") {
-    return {
-      background: hexToRgba(theme.surface, 0.74),
-      borderColor: hexToRgba(theme.text, 0.1),
-      color: theme.text,
-      backdropFilter: "blur(18px)"
-    };
-  }
-
-  return {
-    background: theme.button,
-    borderColor: hexToRgba(theme.button, 0.95),
-    color: theme.buttonText,
-    boxShadow: `0 16px 34px ${hexToRgba(theme.accent, 0.18)}`
-  };
-}
-
-export default function LinkButton({ link, preview = false, theme: themeInput, onTrackClick }: Props) {
-  const theme = normalizeTheme(themeInput);
-  const style = getButtonStyle(link, theme);
+export default function LinkButton({
+  link,
+  preview = false,
+  onTrackClick,
+  buttonStyle,
+  compact = false,
+  className,
+  style
+}: Props) {
+  const visualStyle = buttonStyle || link.style_variant || "solid";
 
   const content = (
     <>
-      <span
-        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl"
-        style={{ background: hexToRgba(theme.surface, 0.23), boxShadow: `inset 0 0 0 1px ${hexToRgba(theme.buttonText, 0.14)}` }}
-      >
-        <IconRenderer name={link.icon_name} className="h-5 w-5" />
+      <span className="k-link-icon">
+        <IconRenderer name={link.icon_name} className={compact ? "h-4 w-4" : "h-5 w-5"} />
       </span>
-      <span className="min-w-0 flex-1 truncate text-left text-[15px] font-bold tracking-[-0.01em]">{link.title}</span>
-      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-xs opacity-70 transition group-hover:opacity-100">â†—</span>
+      <span className="min-w-0 flex-1 text-left">
+        <span className="block truncate font-extrabold tracking-tight">{link.title}</span>
+        {!compact && <span className="block truncate text-xs font-semibold opacity-60">Buka link</span>}
+      </span>
+      <span className="k-link-arrow">
+        <ChevronRight className="h-5 w-5" />
+      </span>
     </>
   );
 
   const classes = cn(
-    "group flex w-full items-center gap-3 rounded-[1.35rem] border px-4 py-3.5 transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(15,23,42,0.13)]",
-    theme.layout === "connector" && "rounded-[1.2rem]",
-    theme.layout === "supporter" && "rounded-[1.6rem]",
-    `link-animation-${link.animation}`
+    "kografly-link group flex w-full items-center gap-3 rounded-[1.55rem] px-4 text-sm transition duration-200",
+    compact ? "min-h-[58px] py-2.5" : "min-h-[76px] py-3.5",
+    variantClass[visualStyle] || variantClass.solid,
+    `link-animation-${link.animation}`,
+    className
   );
 
   if (preview) {
@@ -81,11 +64,11 @@ export default function LinkButton({ link, preview = false, theme: themeInput, o
   return (
     <a
       className={classes}
-      style={style}
       href={link.url}
       target="_blank"
       rel="noreferrer"
       onClick={() => onTrackClick?.(link)}
+      style={style}
     >
       {content}
     </a>

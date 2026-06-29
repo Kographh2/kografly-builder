@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -12,10 +12,15 @@ export type KograflyTemplateId =
   | "blue-supporter"
   | "green-guide"
   | "green-connector"
-  | "green-supporter"
-  | "standard";
+  | "green-supporter";
 
-export type KograflyMascotId = "owl" | "fox" | "turtle";
+export type KograflyMascotId =
+  | "blue-guide-owl"
+  | "blue-connector-fox"
+  | "blue-supporter-turtle"
+  | "green-guide-owl"
+  | "green-connector-fox"
+  | "green-supporter-bear";
 
 export type ProfileTheme = {
   template?: KograflyTemplateId;

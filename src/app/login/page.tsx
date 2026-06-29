@@ -9,7 +9,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           <p className="inline-flex rounded-full border border-indigo-200 bg-white px-4 py-2 text-sm font-semibold text-kografly-indigo shadow-soft">
             Kografly account
           </p>
-          <h1 className="font-serif text-5xl font-bold leading-none text-stone-950 sm:text-6xl">
+          <h1 className="text-5xl font-bold leading-none text-stone-950 sm:text-6xl">
             Amankan username kamu, lalu mulai menenun link.
           </h1>
           <p className="max-w-xl text-lg leading-8 text-stone-600">

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as LucideIcons from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -27,17 +27,13 @@ const ICON_ALIASES: Record<string, string> = {
   Telegram: "Send",
   WhatsApp: "MessageCircle",
   Discord: "MessagesSquare",
-  Portfolio: "BriefcaseBusiness",
+  Portfolio: "Camera",
   Email: "Mail",
   Shop: "ShoppingBag",
   Social: "AtSign",
   Gaming: "Gamepad2",
   Code: "Code2",
-  Community: "MessageCircle",
-  Customer: "Headphones",
-  FAQ: "CircleHelp",
-  Privacy: "LockKeyhole",
-  Service: "ShieldCheck"
+  Community: "MessageCircle"
 };
 
 export default function IconRenderer({ name = "Globe2", className = "h-5 w-5", strokeWidth = 2 }: Props) {

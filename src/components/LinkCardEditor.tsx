@@ -20,7 +20,7 @@ export default function LinkCardEditor({ link, onChange, onSave, onDelete, onMov
     <article className="rounded-[1.7rem] border border-stone-200 bg-white p-5 shadow-soft">
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
-          <p className="font-serif text-2xl font-semibold text-stone-950">{link.title || "Link baru"}</p>
+          <p className="text-2xl font-semibold text-stone-950">{link.title || "Link baru"}</p>
           <p className="text-sm text-stone-500">Sort #{link.sort_order + 1}</p>
         </div>
         <div className="flex gap-2">

@@ -27,11 +27,11 @@ export default function HomePage() {
         <div className="space-y-9">
           <div className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-white/80 px-4 py-2 text-sm font-medium text-kografly-indigo shadow-soft backdrop-blur">
             <Eye className="h-4 w-4" />
-            kographh.web.id/username — public bio link realtime
+            kografly.web.id/username — public bio link realtime
           </div>
 
           <div className="space-y-5">
-            <h1 className="max-w-4xl font-serif text-5xl font-bold leading-[.95] tracking-tight text-stone-950 sm:text-7xl">
+            <h1 className="max-w-4xl text-5xl font-bold leading-[.95] tracking-tight text-stone-950 sm:text-7xl">
               Satu simpul untuk semua link kreatormu.
             </h1>
             <p className="max-w-2xl text-lg leading-8 text-stone-600">
@@ -45,7 +45,7 @@ export default function HomePage() {
             {features.map((feature) => (
               <article key={feature.title} className="thread-indent rounded-thread border border-stone-200 bg-white/90 p-5 shadow-soft backdrop-blur">
                 <feature.icon className="mb-4 h-5 w-5 text-kografly-teal" />
-                <h3 className="font-serif text-xl font-semibold text-stone-950">{feature.title}</h3>
+                <h3 className="text-xl font-semibold text-stone-950">{feature.title}</h3>
                 <p className="mt-2 text-sm leading-6 text-stone-600">{feature.text}</p>
               </article>
             ))}

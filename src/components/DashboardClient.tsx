@@ -96,7 +96,7 @@ export default function DashboardClient() {
         <header className="mb-6 flex flex-col justify-between gap-4 rounded-[2rem] border border-stone-200 bg-white/95 p-5 shadow-soft backdrop-blur md:flex-row md:items-center">
           <div>
             <p className="text-sm font-bold uppercase tracking-[.25em] text-kografly-amber">Kografly Dashboard</p>
-            <h1 className="font-serif text-4xl font-bold text-stone-950">Analytics realtime</h1>
+            <h1 className="text-4xl font-bold text-stone-950">Analytics realtime</h1>
             <p className="mt-1 text-sm text-stone-500">Pantau performa public profile <a className="font-bold text-kografly-indigo" href={publicUrl} target="_blank" rel="noreferrer">/{profile.username}</a>.</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -119,7 +119,7 @@ export default function DashboardClient() {
             <div className="mb-6 flex items-center justify-between">
               <div>
                 <p className="text-sm font-bold uppercase tracking-[.2em] text-kografly-teal">Top Links</p>
-                <h2 className="font-serif text-3xl font-bold text-stone-950">Klik per bio-link</h2>
+                <h2 className="text-3xl font-bold text-stone-950">Klik per bio-link</h2>
               </div>
               <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-bold text-kografly-indigo">{links.length} links</span>
             </div>
@@ -131,7 +131,7 @@ export default function DashboardClient() {
                       <p className="truncate font-bold text-stone-950">{link.title}</p>
                       <p className="truncate text-sm text-stone-500">{link.url}</p>
                     </div>
-                    <span className="font-serif text-2xl font-bold text-kografly-indigo">{formatNumber(clicks)}</span>
+                    <span className="text-2xl font-bold text-kografly-indigo">{formatNumber(clicks)}</span>
                   </div>
                   <div className="h-3 overflow-hidden rounded-full bg-stone-100">
                     <div className="h-full rounded-full bg-kografly-indigo" style={{ width: `${Math.max(4, (clicks / maxClicks) * 100)}%` }} />
@@ -146,7 +146,7 @@ export default function DashboardClient() {
           <article className="rounded-[2rem] border border-stone-200 bg-white p-6 shadow-soft">
             <div className="mb-6 flex items-center gap-2">
               <Radio className="h-5 w-5 text-kografly-teal" />
-              <h2 className="font-serif text-3xl font-bold text-stone-950">Live feed</h2>
+              <h2 className="text-3xl font-bold text-stone-950">Live feed</h2>
             </div>
             <div className="max-h-[560px] space-y-3 overflow-auto pr-1 kografly-scrollbar">
               {events.slice(0, 20).map((event) => {
@@ -175,7 +175,7 @@ function StatCard({ title, value, helper, icon }: { title: string; value: string
     <article className="rounded-[2rem] border border-stone-200 bg-white p-6 shadow-soft">
       <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-kografly-indigo">{icon}</div>
       <p className="text-sm font-bold uppercase tracking-[.2em] text-stone-500">{title}</p>
-      <p className="mt-2 font-serif text-5xl font-bold text-stone-950">{value}</p>
+      <p className="mt-2 text-5xl font-bold text-stone-950">{value}</p>
       <p className="mt-2 text-sm text-stone-500">{helper}</p>
     </article>
   );

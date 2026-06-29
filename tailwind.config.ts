@@ -1,33 +1,32 @@
-﻿import type { Config } from "tailwindcss";
+import type { Config } from "tailwindcss";
 
 const config: Config = {
   content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-poppins)", "ui-sans-serif", "system-ui"],
-        serif: ["var(--font-poppins)", "ui-sans-serif", "system-ui"]
+        sans: ["Poppins", "ui-sans-serif", "system-ui"]
       },
       colors: {
         kografly: {
-          indigo: "#1E5CC8",
+          indigo: "#0B3C8A",
           amber: "#D97706",
           teal: "#0F766E",
-          stone: "#F6FAFF",
-          ink: "#0B1D3A",
-          muted: "#64748B",
+          stone: "#FAFAF9",
+          ink: "#1C1917",
+          muted: "#78716C",
           surface: "#FFFFFF",
           success: "#16A34A",
           error: "#DC2626",
           info: "#2563EB"
         }
       },
-      boxShadow: {
-        thread: "0 24px 70px rgba(15, 23, 42, 0.12)",
-        soft: "0 14px 38px rgba(15, 23, 42, 0.08)"
-      },
       borderRadius: {
         thread: "1.35rem"
+      },
+      boxShadow: {
+        thread: "0 28px 80px rgba(15, 23, 42, 0.13)",
+        soft: "0 14px 40px rgba(15, 23, 42, 0.08)"
       },
       keyframes: {
         "k-rise": {
@@ -48,8 +47,8 @@ const config: Config = {
           "50%": { transform: "translateY(-5px)" }
         },
         "k-glow": {
-          "0%, 100%": { boxShadow: "0 0 0 rgba(30, 92, 200, 0)" },
-          "50%": { boxShadow: "0 0 28px rgba(30, 92, 200, .28)" }
+          "0%, 100%": { boxShadow: "0 0 0 rgba(11, 60, 138, 0)" },
+          "50%": { boxShadow: "0 0 28px rgba(11, 60, 138, .26)" }
         }
       },
       animation: {

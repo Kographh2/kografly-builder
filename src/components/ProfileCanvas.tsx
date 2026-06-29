@@ -1,264 +1,257 @@
-﻿"use client";
+"use client";
 
-import Image from "next/image";
-import type { CSSProperties } from "react";
-import { ExternalLink, Sparkles } from "lucide-react";
+import { AtSign, BadgeCheck, Heart, Link2, Menu, MessageCircle, ShieldCheck, Sparkles, Zap } from "lucide-react";
+import IconRenderer from "@/components/IconRenderer";
 import KograflyMascot from "@/components/KograflyMascot";
 import LinkButton from "@/components/LinkButton";
-import { hexToRgba, normalizeTheme } from "@/constants/templates";
+import { getResolvedTheme } from "@/constants/templates";
 import type { KograflyLink, Profile } from "@/lib/types";
 import { cn } from "@/lib/utils";
-
-type Props = {
-  profile: Profile;
-  links: KograflyLink[];
-  preview?: boolean;
-  compact?: boolean;
-  showBrand?: boolean;
-  className?: string;
-  onTrackClick?: (link: KograflyLink) => void;
-};
-
-function MascotProfile({ profile, compact }: { profile: Profile; compact: boolean }) {
-  const theme = normalizeTheme(profile.theme);
-  const sizeClass = compact ? "h-24 w-24" : "h-28 w-28";
-
-  if (profile.avatar_url) {
-    return (
-      <div
-        className={cn("relative mx-auto grid place-items-center overflow-hidden rounded-full bg-white shadow-[0_18px_50px_rgba(15,23,42,0.14)]", sizeClass)}
-        style={{ border: `6px solid ${hexToRgba(theme.surface, 0.95)}` }}
-      >
-        <Image
-          src={profile.avatar_url}
-          alt={profile.display_name}
-          width={compact ? 96 : 112}
-          height={compact ? 96 : 112}
-          className="h-full w-full object-cover"
-          priority={!compact}
-        />
-      </div>
-    );
-  }
-
-  return (
-    <div className="mx-auto grid place-items-center">
-      <KograflyMascot mascot={theme.mascot} primary={theme.accent} secondary={theme.secondary} soft={theme.soft} compact={compact} />
-    </div>
-  );
-}
-
-function MiniMascot({ profile, className }: { profile: Profile; className?: string }) {
-  const theme = normalizeTheme(profile.theme);
-  if (!profile.avatar_url) return null;
-  return (
-    <KograflyMascot
-      mascot={theme.mascot}
-      primary={theme.accent}
-      secondary={theme.secondary}
-      soft={theme.soft}
-      compact
-      className={cn("pointer-events-none absolute opacity-95", className)}
-    />
-  );
-}
-
-function ProfileHeader({ profile, compact, align = "center" }: { profile: Profile; compact: boolean; align?: "center" | "left" }) {
-  const theme = normalizeTheme(profile.theme);
-  const isLeft = align === "left";
-
-  return (
-    <div className={cn(isLeft ? "text-left" : "text-center")}>
-      <h1
-        className={cn("break-words font-extrabold tracking-[-0.055em]", compact ? "text-3xl" : "text-4xl sm:text-5xl", !isLeft && "mt-4")}
-        style={{ color: theme.text }}
-      >
-        {profile.display_name}
-      </h1>
-      <p className={cn("mt-1 break-words text-sm font-bold", isLeft && "text-[13px]")} style={{ color: theme.accent }}>
-        /{profile.username}
-      </p>
-      {profile.bio ? (
-        <p className={cn("mt-4 break-words text-sm leading-7", isLeft ? "max-w-[230px]" : "mx-auto max-w-md")} style={{ color: theme.muted }}>
-          {profile.bio}
-        </p>
-      ) : null}
-    </div>
-  );
-}
-
-function BrandBadge({ compact }: { compact: boolean }) {
-  return (
-    <span className={cn("inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.18em]", compact && "text-[9px]")}> 
-      <Sparkles className="h-3.5 w-3.5" />
-      Kografly
-    </span>
-  );
-}
+import type { CSSProperties, ReactNode } from "react";
 
 export default function ProfileCanvas({
   profile,
   links,
   preview = false,
   compact = false,
-  showBrand = true,
-  className,
   onTrackClick
-}: Props) {
-  const theme = normalizeTheme(profile.theme);
-  const sortedLinks = links
+}: {
+  profile: Profile;
+  links: KograflyLink[];
+  preview?: boolean;
+  compact?: boolean;
+  onTrackClick?: (link: KograflyLink) => void;
+}) {
+  const { template, values } = getResolvedTheme(profile.theme);
+  const activeLinks = links
     .filter((link) => link.is_active)
     .sort((a, b) => a.sort_order - b.sort_order);
 
-  const pageStyle: CSSProperties = {
-    color: theme.text,
-    backgroundColor: theme.background,
-    backgroundImage:
-      `radial-gradient(circle at 12% 8%, ${hexToRgba(theme.secondary, 0.26)} 0, transparent 28%), ` +
-      `radial-gradient(circle at 88% 10%, ${hexToRgba(theme.accent, 0.14)} 0, transparent 24%), ` +
-      `linear-gradient(180deg, ${theme.background}, ${hexToRgba(theme.decorative, 0.48)})`
-  };
+  const cssVars = {
+    "--k-bg": values.background,
+    "--k-surface": values.surface,
+    "--k-text": values.text,
+    "--k-muted": values.muted,
+    "--k-accent": values.accent,
+    "--k-secondary": values.secondary,
+    "--k-button": values.button,
+    "--k-button-text": values.buttonText,
+    "--k-decorative": values.decorative,
+    "--k-soft": values.soft
+  } as CSSProperties;
 
-  const frameStyle: CSSProperties = {
-    background: hexToRgba(theme.surface, 0.92),
-    borderColor: hexToRgba(theme.text, 0.08)
-  };
-
-  const wrapperClasses = cn("min-h-screen w-full overflow-hidden", compact && "min-h-0", className);
-  const sectionClasses = cn("mx-auto w-full", compact ? "max-w-none px-0 py-0" : "max-w-xl px-4 py-8 sm:py-12");
-  const cardClasses = cn(
-    "relative overflow-hidden border backdrop-blur-xl",
-    compact ? "min-h-full rounded-none border-0 shadow-none" : "rounded-[2.1rem] shadow-[0_28px_80px_rgba(15,23,42,0.13)]"
+  const canvasClass = cn(
+    "kografly-canvas relative mx-auto w-full overflow-hidden bg-[var(--k-bg)] text-[var(--k-text)] shadow-[0_30px_90px_rgba(15,23,42,0.12)]",
+    compact ? "min-h-full rounded-[1.65rem]" : "min-h-screen max-w-[680px] rounded-none sm:my-8 sm:min-h-[860px] sm:rounded-[3rem]"
   );
 
-  const linksBlock = (
-    <div className={cn("relative z-10 space-y-3", compact ? "mt-6" : "mt-7")}>
-      {sortedLinks.length ? (
-        sortedLinks.map((link) => (
-          <LinkButton key={link.id} link={link} theme={theme} preview={preview} onTrackClick={onTrackClick} />
-        ))
-      ) : (
-        <p
-          className="rounded-[1.45rem] border border-dashed p-6 text-center text-sm font-semibold"
-          style={{ borderColor: hexToRgba(theme.text, 0.16), background: hexToRgba(theme.surface, 0.62), color: theme.muted }}
-        >
-          Belum ada link yang dipublish.
-        </p>
-      )}
-    </div>
-  );
-
-  if (theme.layout === "connector") {
+  if (template.layout === "connector") {
     return (
-      <main className={wrapperClasses} style={pageStyle}>
-        <section className={sectionClasses}>
-          <article className={cardClasses} style={frameStyle}>
-            <div
-              className="absolute -right-20 -top-24 h-64 w-64 rounded-full blur-2xl"
-              style={{ background: hexToRgba(theme.secondary, 0.42) }}
-            />
-            <div className={cn("relative z-10", compact ? "px-5 py-7" : "px-7 py-9 sm:px-10")}> 
-              <div className="mb-6 flex items-center justify-between gap-3">
-                <span className="grid h-12 w-12 place-items-center rounded-full text-white shadow-soft" style={{ background: theme.accent }}>
-                  <Sparkles className="h-5 w-5" />
-                </span>
-                <span className="rounded-full border px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.16em]" style={{ borderColor: hexToRgba(theme.accent, 0.18), color: theme.accent }}>
-                  {theme.label}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-[1fr_auto] items-end gap-2">
-                <ProfileHeader profile={profile} compact={compact} align="left" />
-                <div className="relative -mb-3 -mr-4">
-                  {profile.avatar_url ? (
-                    <div className="mb-2 ml-auto h-20 w-20 overflow-hidden rounded-full border-4 border-white shadow-soft">
-                      <Image src={profile.avatar_url} alt={profile.display_name} width={80} height={80} className="h-full w-full object-cover" />
-                    </div>
-                  ) : null}
-                  <KograflyMascot mascot={theme.mascot} primary={theme.accent} secondary={theme.secondary} soft={theme.soft} compact={compact} />
-                </div>
-              </div>
-
-              <div className="mt-6 rounded-[1.6rem] p-4" style={{ background: `linear-gradient(180deg, ${hexToRgba(theme.soft, 0.88)}, ${hexToRgba(theme.decorative, 0.62)})` }}>
-                {linksBlock}
-              </div>
+      <article className={canvasClass} style={cssVars}>
+        <Decorations />
+        <section className={cn("relative overflow-hidden bg-gradient-to-br from-[var(--k-accent)] via-[var(--k-accent)] to-[var(--k-secondary)] text-white", compact ? "rounded-b-[2rem] px-5 pb-12 pt-7" : "rounded-b-[3rem] px-8 pb-16 pt-9 sm:px-10")}> 
+          <TopNav profile={profile} compact={compact} inverse />
+          <div className={cn("relative mt-9 grid items-end gap-4", compact ? "grid-cols-[1fr_145px]" : "grid-cols-[1fr_230px]")}> 
+            <div className="relative z-10">
+              <Pill icon={<Sparkles className="h-4 w-4" />} inverse>{template.heroEyebrow}</Pill>
+              <h1 className={cn("mt-4 font-black leading-[0.98] tracking-[-.05em] drop-shadow-sm", compact ? "text-[2.45rem]" : "text-6xl")}>{template.heroTitle}</h1>
+              <p className={cn("mt-5 max-w-[270px] font-semibold leading-7 text-white/85", compact ? "text-sm" : "text-lg")}>{profile.bio || template.helperBody}</p>
             </div>
-          </article>
-
-          {showBrand ? <BuiltWith theme={theme} /> : null}
+            <div className="relative z-10">
+              <div className="absolute inset-x-0 bottom-0 h-32 rounded-full bg-white/15 blur-2xl" />
+              <KograflyMascot templateId={template.id} mascotId={values.mascot} className={compact ? "relative z-10 h-[210px] w-full object-contain" : "relative z-10 h-[330px] w-full object-contain"} priority={!preview} />
+            </div>
+          </div>
+          <WaveDivider />
         </section>
-      </main>
+
+        <section className={cn("relative z-10 space-y-4", compact ? "-mt-8 px-5 pb-7" : "-mt-10 px-8 pb-10 sm:px-10")}> 
+          <LinkList links={activeLinks} preview={preview} compact={compact} onTrackClick={onTrackClick} buttonStyle="solid" />
+          <TrustStrip compact={compact} />
+          <SocialDots links={activeLinks} preview={preview} onTrackClick={onTrackClick} />
+        </section>
+      </article>
     );
   }
 
-  if (theme.layout === "supporter") {
+  if (template.layout === "supporter") {
     return (
-      <main className={wrapperClasses} style={pageStyle}>
-        <section className={sectionClasses}>
-          <article className={cardClasses} style={frameStyle}>
-            <div
-              className="absolute inset-x-0 top-0 h-44"
-              style={{ background: `linear-gradient(135deg, ${hexToRgba(theme.decorative, 0.85)}, ${hexToRgba(theme.soft, 0.92)})` }}
-            />
-            <div
-              className="absolute left-0 top-32 h-16 w-full"
-              style={{ background: `radial-gradient(120% 95% at 50% 0%, transparent 50%, ${hexToRgba(theme.surface, 0.94)} 51%)` }}
-            />
-            <MiniMascot profile={profile} className="right-2 top-12" />
-            <div className={cn("relative z-10", compact ? "px-5 pb-7 pt-10" : "px-7 pb-9 pt-12 sm:px-10")}> 
-              <MascotProfile profile={profile} compact={compact} />
-              <ProfileHeader profile={profile} compact={compact} />
-              <div className="mt-6 rounded-[1.8rem] border p-3" style={{ borderColor: hexToRgba(theme.text, 0.08), background: hexToRgba(theme.surface, 0.55) }}>
-                {linksBlock}
+      <article className={canvasClass} style={cssVars}>
+        <Decorations />
+        <section className={cn("relative z-10", compact ? "px-5 py-7" : "px-8 py-10 sm:px-10")}> 
+          <TopNav profile={profile} compact={compact} />
+          <div className={cn("mt-9 grid items-center gap-4", compact ? "grid-cols-[1fr_135px]" : "grid-cols-[1fr_230px]")}> 
+            <div>
+              <Pill icon={<Heart className="h-4 w-4" />}>{template.heroEyebrow}</Pill>
+              <h1 className={cn("mt-4 font-black leading-[1.03] tracking-[-.05em]", compact ? "text-[2.2rem]" : "text-6xl")}>{template.heroTitle}</h1>
+              <p className={cn("mt-4 max-w-[320px] leading-7 text-[var(--k-muted)]", compact ? "text-sm" : "text-lg")}>{profile.bio || template.helperBody}</p>
+            </div>
+            <div className="relative">
+              <div className="absolute inset-x-4 bottom-4 h-28 rounded-full bg-[var(--k-soft)] blur-xl" />
+              <KograflyMascot templateId={template.id} mascotId={values.mascot} className={compact ? "relative h-[190px] w-full" : "relative h-[300px] w-full"} priority={!preview} />
+            </div>
+          </div>
+          <div className="relative mt-6 overflow-hidden rounded-[1.7rem] border border-black/5 bg-white/78 p-5 shadow-[0_18px_45px_rgba(15,23,42,0.08)] backdrop-blur">
+            <div className="flex items-center gap-4">
+              <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-[var(--k-soft)] text-[var(--k-accent)]"><ShieldCheck className="h-7 w-7" /></span>
+              <div>
+                <h2 className="font-extrabold tracking-tight">{template.helperTitle}</h2>
+                <p className="mt-1 text-sm leading-6 text-[var(--k-muted)]">{template.helperBody}</p>
               </div>
             </div>
-          </article>
-
-          {showBrand ? <BuiltWith theme={theme} /> : null}
+          </div>
         </section>
-      </main>
+        <section className={cn("relative z-10 space-y-4", compact ? "px-5 pb-7" : "px-8 pb-10 sm:px-10")}> 
+          <LinkList links={activeLinks} preview={preview} compact={compact} onTrackClick={onTrackClick} buttonStyle="soft" />
+          <div className="rounded-[1.7rem] border border-[var(--k-secondary)]/40 bg-[var(--k-soft)]/80 p-5">
+            <div className="flex items-center gap-4">
+              <span className="grid h-12 w-12 place-items-center rounded-2xl bg-white text-[var(--k-accent)]"><BadgeCheck className="h-6 w-6" /></span>
+              <div>
+                <p className="font-extrabold">Dukungan Terpercaya</p>
+                <p className="text-sm text-[var(--k-muted)]">Kami hadir untuk Anda, setiap langkah.</p>
+              </div>
+            </div>
+          </div>
+          <SocialDots links={activeLinks} preview={preview} onTrackClick={onTrackClick} />
+        </section>
+      </article>
     );
   }
 
   return (
-    <main className={wrapperClasses} style={pageStyle}>
-      <section className={sectionClasses}>
-        <article className={cardClasses} style={frameStyle}>
-          <div
-            className={cn("relative overflow-hidden", compact ? "h-28" : "h-36")}
-            style={{ background: `linear-gradient(135deg, ${theme.accent}, ${theme.secondary})` }}
-          >
-            <div className="absolute -left-12 -top-16 h-40 w-40 rounded-full bg-white/15" />
-            <div className="absolute -right-12 bottom-0 h-44 w-44 rounded-full bg-white/14" />
-            <MiniMascot profile={profile} className="right-2 top-3" />
-            <div className="absolute left-5 top-5 text-white/95">
-              <BrandBadge compact={compact} />
-            </div>
+    <article className={canvasClass} style={cssVars}>
+      <Decorations />
+      <section className={cn("relative z-10", compact ? "px-5 py-7" : "px-8 py-10 sm:px-10")}> 
+        <TopNav profile={profile} compact={compact} />
+        <div className={cn("mt-10 grid items-center", compact ? "grid-cols-[1fr_145px] gap-2" : "grid-cols-[1fr_240px] gap-6")}> 
+          <div>
+            <Pill icon={<AtSign className="h-4 w-4" />}>{template.heroEyebrow}</Pill>
+            <h1 className={cn("mt-4 font-black leading-[0.98] tracking-[-.055em]", compact ? "text-[2.35rem]" : "text-6xl")}>{template.heroTitle}</h1>
+            <p className={cn("mt-4 max-w-[320px] leading-7 text-[var(--k-muted)]", compact ? "text-sm" : "text-lg")}>{profile.bio || template.helperBody}</p>
+            <p className="mt-4 text-sm font-extrabold text-[var(--k-accent)]">/{profile.username}</p>
           </div>
-
-          <div className={cn("relative z-10", compact ? "px-5 pb-7" : "px-7 pb-9 sm:px-10")}> 
-            <div className={compact ? "-mt-12" : "-mt-14"}>
-              <MascotProfile profile={profile} compact={compact} />
-            </div>
-            <ProfileHeader profile={profile} compact={compact} />
-            {linksBlock}
+          <div className="relative">
+            <div className="absolute inset-0 scale-95 rounded-full bg-[var(--k-decorative)]" />
+            <KograflyMascot templateId={template.id} mascotId={values.mascot} className={compact ? "relative h-[210px] w-full" : "relative h-[330px] w-full"} priority={!preview} />
           </div>
-        </article>
-
-        {showBrand ? <BuiltWith theme={theme} /> : null}
+        </div>
       </section>
-    </main>
+      <div className="relative -mt-2 h-16 bg-[var(--k-decorative)]/65">
+        <WaveDivider light />
+      </div>
+      <section className={cn("relative z-10 -mt-10 space-y-4", compact ? "px-5 pb-7" : "px-8 pb-10 sm:px-10")}> 
+        <LinkList links={activeLinks} preview={preview} compact={compact} onTrackClick={onTrackClick} buttonStyle="soft" />
+        <SocialDots links={activeLinks} preview={preview} onTrackClick={onTrackClick} />
+      </section>
+    </article>
   );
 }
 
-function BuiltWith({ theme }: { theme: ReturnType<typeof normalizeTheme> }) {
+function TopNav({ profile, compact, inverse = false }: { profile: Profile; compact?: boolean; inverse?: boolean }) {
   return (
-    <a
-      href="/"
-      className="mx-auto mt-6 flex w-fit items-center gap-2 rounded-full border px-5 py-3 text-sm font-bold shadow-[0_12px_34px_rgba(15,23,42,0.08)] backdrop-blur transition hover:-translate-y-0.5"
-      style={{ background: hexToRgba(theme.surface, 0.86), borderColor: hexToRgba(theme.text, 0.08), color: theme.text }}
-    >
-      Built with Kografly <ExternalLink className="h-4 w-4" />
-    </a>
+    <div className="relative z-20 flex items-center justify-between gap-4">
+      <div className="flex min-w-0 items-center gap-3">
+        <span className={cn("grid shrink-0 place-items-center rounded-2xl shadow-sm", compact ? "h-11 w-11" : "h-14 w-14", inverse ? "bg-white text-[var(--k-accent)]" : "bg-[var(--k-accent)] text-white")}> <Link2 className={compact ? "h-5 w-5" : "h-7 w-7"} /></span>
+        <div className="min-w-0">
+          <p className={cn("truncate font-black uppercase tracking-tight", compact ? "text-base" : "text-2xl", inverse ? "text-white" : "text-[var(--k-text)]")}>{profile.display_name || "Brand Name"}</p>
+          <p className={cn("truncate text-xs font-semibold", inverse ? "text-white/75" : "text-[var(--k-muted)]")}>Connecting Everything</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-3">
+        {profile.avatar_url ? (
+          <div className={cn("overflow-hidden rounded-full ring-4", inverse ? "ring-white/20" : "ring-[var(--k-soft)]", compact ? "h-10 w-10" : "h-12 w-12")}>
+            <img src={profile.avatar_url} alt={profile.display_name} className="h-full w-full object-cover" />
+          </div>
+        ) : null}
+        <span className={cn("grid rounded-full", compact ? "h-10 w-10" : "h-12 w-12", inverse ? "bg-white/18 text-white" : "bg-[var(--k-soft)] text-[var(--k-accent)]")}><Menu className="m-auto h-5 w-5" /></span>
+      </div>
+    </div>
+  );
+}
+
+function Pill({ icon, children, inverse = false }: { icon: ReactNode; children: ReactNode; inverse?: boolean }) {
+  return <span className={cn("inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-extrabold", inverse ? "bg-white/18 text-white" : "bg-[var(--k-soft)] text-[var(--k-accent)]")}>{icon}{children}</span>;
+}
+
+function LinkList({
+  links,
+  preview,
+  compact,
+  onTrackClick,
+  buttonStyle
+}: {
+  links: KograflyLink[];
+  preview: boolean;
+  compact: boolean;
+  onTrackClick?: (link: KograflyLink) => void;
+  buttonStyle: "solid" | "outline" | "soft" | "glass";
+}) {
+  if (!links.length) {
+    return (
+      <div className="rounded-[1.65rem] border border-dashed border-[var(--k-secondary)]/60 bg-white/70 p-5 text-center text-sm font-semibold text-[var(--k-muted)]">
+        Link yang aktif akan muncul di sini.
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {links.map((link) => (
+        <LinkButton key={link.id} link={link} preview={preview} compact={compact} onTrackClick={onTrackClick} buttonStyle={buttonStyle} />
+      ))}
+    </div>
+  );
+}
+
+function TrustStrip({ compact }: { compact: boolean }) {
+  const items = [
+    { icon: <ShieldCheck className="h-6 w-6" />, title: "Terpercaya", body: "Aman & profesional" },
+    { icon: <Zap className="h-6 w-6" />, title: "Akses Cepat", body: "Semua 1 klik" },
+    { icon: <MessageCircle className="h-6 w-6" />, title: "Selalu Siap", body: "Responsif" }
+  ];
+  return (
+    <div className={cn("grid grid-cols-3 divide-x divide-[var(--k-secondary)]/30 rounded-[1.6rem] border border-[var(--k-secondary)]/35 bg-white/75 p-3 shadow-[0_12px_35px_rgba(15,23,42,0.07)]", compact ? "gap-1" : "gap-2 p-4")}> 
+      {items.map((item) => <div key={item.title} className="px-2 text-center"><div className="mx-auto grid h-8 w-8 place-items-center text-[var(--k-accent)]">{item.icon}</div><p className="mt-1 text-xs font-extrabold">{item.title}</p><p className="text-[10px] text-[var(--k-muted)]">{item.body}</p></div>)}
+    </div>
+  );
+}
+
+function SocialDots({ links, preview, onTrackClick }: { links: KograflyLink[]; preview: boolean; onTrackClick?: (link: KograflyLink) => void }) {
+  const socials = links.slice(0, 5);
+  if (!socials.length) return null;
+
+  return (
+    <div className="flex items-center justify-center gap-3 pt-2">
+      {socials.map((link) => {
+        const content = <span className="grid h-12 w-12 place-items-center rounded-full bg-[var(--k-accent)] text-white shadow-[0_10px_22px_rgba(15,23,42,0.18)] transition hover:-translate-y-1"><span className="sr-only">{link.title}</span><IconSmall name={link.icon_name} /></span>;
+        if (preview) return <div key={link.id}>{content}</div>;
+        return <a key={link.id} href={link.url} target="_blank" rel="noreferrer" onClick={() => onTrackClick?.(link)}>{content}</a>;
+      })}
+    </div>
+  );
+}
+
+function IconSmall({ name }: { name: string }) {
+  return <IconRenderer name={name} className="h-5 w-5" />;
+}
+
+function Decorations() {
+  return (
+    <>
+      <div className="pointer-events-none absolute -left-16 top-24 h-48 w-48 rounded-full bg-[var(--k-decorative)]/70 blur-3xl" />
+      <div className="pointer-events-none absolute -right-20 bottom-40 h-56 w-56 rounded-full bg-[var(--k-soft)] blur-3xl" />
+      <div className="pointer-events-none absolute bottom-0 left-0 h-24 w-32 rounded-tr-[100%] bg-[var(--k-decorative)]/60" />
+      <div className="pointer-events-none absolute bottom-0 right-0 h-24 w-32 rounded-tl-[100%] bg-[var(--k-decorative)]/60" />
+      <div className="pointer-events-none absolute right-10 top-28 text-[var(--k-secondary)]/60"><Sparkles className="h-7 w-7" /></div>
+      <div className="pointer-events-none absolute left-10 top-64 text-[var(--k-secondary)]/50"><Sparkles className="h-5 w-5" /></div>
+    </>
+  );
+}
+
+function WaveDivider({ light = false }: { light?: boolean }) {
+  return (
+    <svg className={cn("absolute inset-x-0 bottom-[-1px] h-16 w-full", light ? "text-[var(--k-bg)]" : "text-[var(--k-bg)]")} viewBox="0 0 600 80" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M0 48 C 120 88 190 6 315 38 C 430 68 480 42 600 18 L600 80 L0 80 Z" fill="currentColor" />
+    </svg>
   );
 }
